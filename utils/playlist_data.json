@@ -1,0 +1,14 @@
+{
+  "playlistsByUser": {
+    "test": [
+      {
+        "name": "playlist1",
+        "songs": []
+      },
+      {
+        "name": "weitere playlist",
+        "songs": []
+      }
+    ]
+  }
+}

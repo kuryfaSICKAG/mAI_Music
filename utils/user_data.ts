@@ -4,12 +4,10 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 
-// __dirname/__filename für ES Modules erzeugen
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-
-const filePath = path.join(__dirname, "", "user_data.json");
+const filePath = path.join(__dirname, "user_data.json");
 
 // Datei laden
 function loadUsers() {
@@ -32,7 +30,7 @@ export function createUser(username: string, password: string) {
 
     // prüfen ob user existiert
     if (data.users.some((u: any) => u.username === username)) {
-        console.log("❌ Benutzer existiert bereits!");
+        console.log("Benutzer existiert bereits!");
         return null;
     }
 
@@ -40,10 +38,8 @@ export function createUser(username: string, password: string) {
     data.users.push(newUser);
 
     saveUsers(data);
-    console.log("✅ Benutzer wurde erfolgreich gespeichert!");
 
     activeUser = username
-    return newUser;
 }
 
 export function validateUser(username: string, password: string) {
@@ -54,11 +50,10 @@ export function validateUser(username: string, password: string) {
     );
 
     if (!user) {
-        console.log("❌ Benutzername oder Passwort falsch!");
-        return null;
+        console.log("\n# Benutzername oder Passwort falsch!");
+        return false;
     }
 
-    console.log("✅ Login erfolgreich!");
     activeUser = username
-    return user;
+    return true
 }
