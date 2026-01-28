@@ -1,5 +1,7 @@
 import { questionInt, question } from "readline-sync";
-import { createUser, validateUser } from "../utils/util.ts";
+import { createUser, validateUser } from "../utils/user_data.ts";
+import promptSync from "prompt-sync"
+
 
 export function drawMenu(){
     console.log("\n                     |========= Willkommen bei mAI music =========|")
@@ -21,10 +23,12 @@ export function drawMenu(){
     console.log("\n")
 }
 
+const prompt = promptSync({ sigint: true });
+
 function signUpUser() {
     const name = question("\nBenutzername: ")
-    const password = question("Passwort: ", {hideEchoBack: true})
-    const temp = question("Passwort erneut: ", {hideEchoBack: true})
+    const password = prompt("Passwort: ", { echo: "*" });
+    const temp = prompt("Passwort erneut: ", { echo: "*" });
     
     if(password!==temp){
         console.log("Passwörter stimmen nicht überein.")
@@ -37,7 +41,7 @@ function signUpUser() {
 
 function loginUser() {
     const name = question("\nBenutzername: ")
-    const password = question("Passwort: ", {hideEchoBack: true})
+    const password = prompt("Passwort: ", { echo: "*" });
 
     const user = validateUser(name, password);
     return user;

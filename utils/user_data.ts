@@ -9,7 +9,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 
-const filePath = path.join(__dirname, "", "user_Data.json");
+const filePath = path.join(__dirname, "", "user_data.json");
 
 // Datei laden
 function loadUsers() {
