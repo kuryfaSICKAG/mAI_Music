@@ -1,16 +1,25 @@
+export interface DB {
+  playlistsByUser: Record<string, Playlist[]>;
+}
+
+export interface Playlist {
+  name: string;
+  songs: Song[];
+}
+
 export interface Song {
-    name: String,
-    artist: Artist,
-    genre: Genre,
+    name: string,
+    artist: Artist[],
+    genre: Genre[],
     year: number,
-    duration: number,
-    album: Album,
+    duration: number | string,
+    album?: Album,
 }
 
 export interface Album {
-    name: String,
-    artist: Artist,
-    genre: Genre,
+    name: string,
+    artist: Artist[],
+    genre: Genre[],
     year: number,
     songs: Song[],
 }
@@ -34,9 +43,9 @@ export enum Genre {
 }
 
 export interface Artist {
-    name: String,
-    nationality: String,
+    name: string,
+    nationality: string,
     age: number,
-    genre: Genre
+    genre: Genre[]
 }
 

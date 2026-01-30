@@ -1,3 +1,3 @@
-import { drawMenu } from "./menu/menu.ts";
+import { authenticate } from "./gui/authentication.ts";
 
-drawMenu()
+authenticate()

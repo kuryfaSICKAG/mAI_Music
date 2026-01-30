@@ -1,0 +1,21 @@
+{
+  "playlistsByUser": {
+    "test": [
+      {
+        "name": "playlist1",
+        "songs": []
+      },
+      {
+        "name": "weitere playlist",
+        "songs": []
+      }
+    ],
+    "test_": [
+      {
+        "name": "Favorites",
+        "songs": []
+      }
+    ],
+    "lol": []
+  }
+}
