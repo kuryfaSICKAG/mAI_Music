@@ -20,7 +20,7 @@ export async function drawMenu(activeUser: string, loggedIn : boolean) {
     console.log("\n                     |========= Willkommen bei mAI music =========|")
     console.log(`\n------------------------\n${activeUser}'s Homepage\n------------------------`)
 
-    let menu : number = questionInt(">>> Playlists verwalten (1)\n>>> Songs suchen (2)\n>>> Spotify-Anmeldung (3)\n>>> Zurück (4)\n\n> ")
+    let menu : number = questionInt(">>> Playlists verwalten (1)\n>>> Songs suchen (2)\n>>> Spotify-Anmeldung (3)\n>>> Abmelden (4)\n\n> ")
 
     switch(menu){
         case 1:

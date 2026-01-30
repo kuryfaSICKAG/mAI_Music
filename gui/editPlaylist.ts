@@ -30,7 +30,7 @@ export function editPlaylist(name : string){
                 }
                 renamePlaylist(activeUser, oldName, newName)
                 name = newName
-                break
+                return editPlaylist(name)
             case 2:
 
                 break

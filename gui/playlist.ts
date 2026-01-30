@@ -27,7 +27,7 @@ export function drawPlaylist(activeUser : string){
             }
             createPlaylist(activeUser, name)
             let nowEdit : string = question(`Willst du deine erstelle Playlist "${name}" direkt bearbeiten (y/n)?\n`)
-            if(nowEdit === "y"||"Y"){
+            if(nowEdit === "y" || nowEdit === "Y"){
                 editPlaylist(name)
             }
             drawPlaylist(activeUser)
@@ -36,13 +36,21 @@ export function drawPlaylist(activeUser : string){
             console.clear()
             console.log("\n                     |========= Willkommen bei mAI music =========|")
             console.log(`\n------------------------\n${activeUser}'s Playlists\nPlaylist bearbeiten\n------------------------`)
-
-            console.log(formatPlaylists(getPlaylists(activeUser)))
-            name = question("\n~ Welche Playlist willst du bearbeiten?\n")
-            if(name === ""){
-                console.log("# Gib einen gültigen Namen ein!")
-                return drawPlaylist(activeUser)
+            
+            let lists = getPlaylists(activeUser);
+            if (lists.length === 0) {
+                console.log("# Du hast keine Playlists zum Bearbeiten!");
+                return drawPlaylist(activeUser);
             }
+
+            console.log(formatPlaylists(lists))
+            name = question("\n~ Welche Playlist willst du bearbeiten?\n")
+            
+            if (!lists.some(pl => pl.name === name)) {
+                console.log(`# Die Playlist "${name}" existiert nicht!`);
+                return drawPlaylist(activeUser);
+            }
+
             editPlaylist(name)
             break
         case 3:

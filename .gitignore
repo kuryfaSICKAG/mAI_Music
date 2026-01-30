@@ -1,3 +1,5 @@
 node_modules/
 package*
 tsconfig.json
+utils/playlist_data.json
+utils/user_Data.json
