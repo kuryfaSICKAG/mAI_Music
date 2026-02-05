@@ -1,7 +1,7 @@
 // Client/Frontend/connect.ts
 import { question, questionInt } from "readline-sync";
-import { connectToServer } from "../Backend/connection.js";
-import { authenticate } from "./authenticate.js";
+import { connectToServer } from "../Backend/connection.ts";
+import { authenticate } from "./authenticate.ts";
 
 export async function askConnection() {
     console.clear();

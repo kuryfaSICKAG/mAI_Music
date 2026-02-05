@@ -1,7 +1,7 @@
 // Client/Backend/connection.ts
 // Stellt die Verbindung zum Server her, validiert sie und (optional) startet authentication()
 
-import { authenticate } from "../Frontend/authenticate.js";
+import { authenticate } from "../Frontend/authenticate.ts";
 
 /**
  * Interner Zustand: aktuelle Server-URL (wird von setServer/getServer verwaltet)

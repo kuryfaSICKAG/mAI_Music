@@ -1,4 +1,4 @@
-import { Song, Album, Artist, Genre } from '../models/personalModels';
+import type { Song, Album, Artist, Genre } from './personalModels.ts';
 
 export interface SpotifyConfig {
     clientId: string;

@@ -4,7 +4,7 @@
 // Keine UI, kein activeUser, keine zusätzlichen Features.
 // ============================================================
 
-import { getServerUrl } from "./connection.js";
+import { getServerUrl } from "./connection.ts";
 
 /**
  * Hilfsfunktion: JSON sicher parsen

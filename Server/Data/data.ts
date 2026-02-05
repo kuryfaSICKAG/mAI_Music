@@ -1,25 +1,42 @@
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
 
-// Dateien korrekt referenzieren
-const userFile = path.join(process.cwd(), "Server/TS/user_data.json");
-const playlistFile = path.join(process.cwd(), "Server/TS/playlist_data.json");
+// ESM Ersatz für __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-// Allgemeine Loader
-export function loadJSON(filePath: string) {
-    if (!fs.existsSync(filePath)) {
-        fs.writeFileSync(filePath, JSON.stringify({}, null, 4));
+// Dateien im selben Ordner wie data.ts
+const userFile = path.join(__dirname, "user_data.json");
+const playlistFile = path.join(__dirname, "playlist_data.json");
+
+// Datei/Ordner sicherstellen
+function ensureFile(filePath: string, defaultData: object) {
+    const dir = path.dirname(filePath);
+
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
     }
+
+    if (!fs.existsSync(filePath)) {
+        fs.writeFileSync(filePath, JSON.stringify(defaultData, null, 4));
+    }
+}
+
+// JSON Loader
+export function loadJSON(filePath: string) {
+    ensureFile(filePath, {});
     return JSON.parse(fs.readFileSync(filePath, "utf8"));
 }
 
-// Allgemeiner Saver
+// JSON Saver
 export function saveJSON(filePath: string, data: any) {
     fs.writeFileSync(filePath, JSON.stringify(data, null, 4));
 }
 
-// Spezifische Exporte ↓↓↓
+// Spezifische Exporte
 export function loadUsers() {
+    ensureFile(userFile, { users: [] });
     return loadJSON(userFile);
 }
 
@@ -28,6 +45,7 @@ export function saveUsers(data: any) {
 }
 
 export function loadPlaylists() {
+    ensureFile(playlistFile, { playlists: [] });
     return loadJSON(playlistFile);
 }
 
