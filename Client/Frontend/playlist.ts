@@ -1,8 +1,8 @@
 import { questionInt, question, keyInYN } from "readline-sync";
 import { drawMenu } from "./menu.ts"
-import { getPlaylists, createPlaylist, deletePlaylist } from "../utils/playlist_data.ts";
+import { getPlaylists, createPlaylist, deletePlaylist } from "../Backend/playlist_data.ts";
 import { editPlaylist } from "./editPlaylist.ts";
-import { formatPlaylists } from "../utils/format.ts";
+import { formatPlaylists } from "../Backend/format.ts";
 
 export function drawPlaylist(activeUser : string){
     console.clear()

@@ -1,4 +1,4 @@
-import type { Song, Playlist } from "../models/personalModels.ts";
+import type { Song, Playlist } from "../../models/personalModels.ts";
 
 /** Wandelt Sekunden nach mm:ss um */
 function toMmSs(duration: number | string): string {

@@ -1,5 +1,5 @@
 import { questionInt } from "readline-sync";
-import { authenticate } from "./authentication.ts";
+import { authenticate } from "./authenticate.ts";
 import { drawPlaylist } from "./playlist.ts";
 
 function sleep(ms: number) {

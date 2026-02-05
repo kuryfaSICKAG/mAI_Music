@@ -1,9 +1,9 @@
-import { renamePlaylist, addSongToPlaylist, removeSong, removeSongByIndex } from "../utils/playlist_data.ts";
-import { activeUser } from "../utils/user_data.ts";
-import { getPlaylists } from "../utils/playlist_data.ts";
+import { renamePlaylist, addSongToPlaylist, removeSong, removeSongByIndex } from "../Backend/playlist_data.ts";
+import { activeUser } from "./authenticate.ts";
+import { getPlaylists } from "../Backend/playlist_data.ts";
 import { question, questionInt } from "readline-sync";
 import { drawPlaylist } from "./playlist.ts";
-import { formatPlaylists } from "../utils/format.ts";
+import { formatPlaylists } from "../Backend/format.ts";
 
 export function editPlaylist(name : string){
     console.clear()

@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 
-import type { DB, Playlist, Song } from "../models/personalModels.ts";
+import type { DB, Playlist, Song } from "../../models/personalModels.ts";
 
 import { fileURLToPath } from "url";
 import { dirname } from "path";

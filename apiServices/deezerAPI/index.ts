@@ -4,7 +4,7 @@ async function main() {
   const api = new DeezerAPI();
 
   // Search track by title only
-  const tracks = await api.searchTrack("Yellow");
+  const tracks = await api.searchTrack("hello");
   if (tracks.data && tracks.data.length > 0) {
     console.log("Tracks found:");
     tracks.data.forEach((track: any, idx: number) => {
