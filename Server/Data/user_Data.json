@@ -11,6 +11,10 @@
         {
             "username": "lol",
             "password": "lol"
+        },
+        {
+            "username": "server1",
+            "password": "1234"
         }
     ]
 }

@@ -1,25 +1,26 @@
 {
-  "playlistsByUser": {
-    "test": [
-      {
-        "name": "playlist1",
-        "songs": []
-      },
-      {
-        "name": "weitere playlist",
-        "songs": []
-      },
-      {
-        "name": "kekw",
-        "songs": []
-      }
-    ],
-    "test_": [
-      {
-        "name": "Favorites",
-        "songs": []
-      }
-    ],
-    "lol": []
-  }
+    "playlistsByUser": {
+        "test": [
+            {
+                "name": "playlist1",
+                "songs": []
+            },
+            {
+                "name": "weitere playlist",
+                "songs": []
+            },
+            {
+                "name": "kekw",
+                "songs": []
+            }
+        ],
+        "test_": [
+            {
+                "name": "Favorites",
+                "songs": []
+            }
+        ],
+        "lol": [],
+        "server1": []
+    }
 }

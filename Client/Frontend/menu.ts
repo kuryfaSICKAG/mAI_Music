@@ -1,6 +1,6 @@
 import { questionInt } from "readline-sync";
 import { authenticate } from "./authenticate.ts";
-import { drawPlaylist } from "./playlist.ts";
+import { drawPlaylist } from "./drawPlaylist.ts";
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
