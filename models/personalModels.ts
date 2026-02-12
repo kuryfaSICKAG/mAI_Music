@@ -8,12 +8,12 @@ export interface Playlist {
 }
 
 export interface Song {
-    name: string,
-    artist: Artist[],
-    genre: Genre[],
-    year: number,
-    duration: number | string,
-    album?: Album,
+  name: string,
+  artist: Artist[],
+  genre: Genre[],
+  year: number,
+  duration: number | string,
+  album?: Album | undefined,
 }
 
 export interface Album {
