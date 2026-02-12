@@ -2,7 +2,12 @@ export interface DB {
   playlistsByUser: Record<string, Playlist[]>;
 }
 
+enum Visibility {
+  public,
+  private
+}
 export interface Playlist {
+  visibility: Visibility;
   name: string;
   songs: Song[];
 }
