@@ -2,6 +2,7 @@ import { questionInt } from "readline-sync";
 import { authenticate } from "./authenticate.ts";
 import { drawPlaylist } from "./drawPlaylist.ts";
 import { drawOnline } from "./online.ts";
+import { drawSong } from "./song.ts";
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -28,7 +29,7 @@ export async function drawMenu(activeUser: string, loggedIn : boolean) {
             drawPlaylist(activeUser)
             break
         case 2:
-            //drawSong(activeUser)
+            drawSong(activeUser)
             break
         case 3:
             drawOnline(activeUser)
