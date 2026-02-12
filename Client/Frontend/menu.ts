@@ -1,6 +1,7 @@
 import { questionInt } from "readline-sync";
 import { authenticate } from "./authenticate.ts";
 import { drawPlaylist } from "./drawPlaylist.ts";
+import { drawOnline } from "./online.ts";
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -20,7 +21,7 @@ export async function drawMenu(activeUser: string, loggedIn : boolean) {
     console.log("\n                     |========= Willkommen bei mAI music =========|")
     console.log(`\n------------------------\n${activeUser}'s Homepage\n------------------------`)
 
-    let menu : number = questionInt(">>> Playlists verwalten (1)\n>>> Songs suchen (2)\n>>> Spotify-Anmeldung (3)\n>>> Abmelden (4)\n\n> ")
+    let menu : number = questionInt(">>> Playlists verwalten (1)\n>>> Songs suchen (2)\n>>> Online-Funktionen (3)\n>>> Abmelden (4)\n\n> ")
 
     switch(menu){
         case 1:
@@ -30,7 +31,7 @@ export async function drawMenu(activeUser: string, loggedIn : boolean) {
             //drawSong(activeUser)
             break
         case 3:
-            //drawSpotify(activeUser)
+            drawOnline(activeUser)
             break
         case 4:
             return authenticate()

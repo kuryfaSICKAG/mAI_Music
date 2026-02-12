@@ -1,6 +1,6 @@
 node_modules/
 package*
 tsconfig.json
-utils/playlist_data.json
-utils/user_Data.json
+Server/Data/playlist_data.json
+Server/Data/user_Data.json
 to-do.txt
