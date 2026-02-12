@@ -2,23 +2,67 @@
     "users": [
         {
             "username": "test",
-            "password": "1234"
+            "password": "1234",
+            "profile": {
+                "favoriteGenres": [],
+                "locale": "de-DE",
+                "onboardingDone": false
+            },
+            "favorites": []
         },
         {
             "username": "test_",
-            "password": "12345"
+            "password": "12345",
+            "profile": {
+                "favoriteGenres": [],
+                "locale": "de-DE",
+                "onboardingDone": false
+            },
+            "favorites": []
         },
         {
             "username": "lol",
-            "password": "lol"
+            "password": "lol",
+            "profile": {
+                "favoriteGenres": [],
+                "locale": "de-DE",
+                "onboardingDone": false
+            },
+            "favorites": []
         },
         {
             "username": "server1",
-            "password": "1234"
+            "password": "1234",
+            "profile": {
+                "favoriteGenres": [],
+                "locale": "de-DE",
+                "onboardingDone": false
+            },
+            "favorites": []
         },
         {
             "username": "ssssssssss",
-            "password": "1234"
+            "password": "1234",
+            "profile": {
+                "favoriteGenres": [],
+                "locale": "de-DE",
+                "onboardingDone": false
+            },
+            "favorites": []
+        }
+    ],
+    "authSessions": [
+        {
+            "token": "mljlr7ag-039el126w6",
+            "username": "lol",
+            "createdAt": "2026-02-12T15:17:17.608Z",
+            "expiresAt": "2026-02-19T15:17:17.608Z"
+        },
+        {
+            "token": "mljls7vl-lrkcyesj25",
+            "createdAt": "2026-02-12T15:18:05.025Z",
+            "expiresAt": "2026-02-19T15:18:05.025Z",
+            "username": "test"
         }
     ]
 }

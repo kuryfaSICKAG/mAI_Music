@@ -15,6 +15,7 @@ const PORT = 8080;
 
 app.use(express.json());
 
+app.use(express.json())
 app.use(rootRouter);
 app.use(searchRouter);
 app.use(usersRouter);

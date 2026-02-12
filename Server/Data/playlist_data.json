@@ -24,7 +24,27 @@
                 "public": false
             }
         ],
-        "lol": [],
+        "lol": [
+            {
+                "name": "kekw",
+                "songs": [],
+                "public": false,
+                "receivedFrom": "test",
+                "receivedAt": "2026-02-12T15:16:53.621Z"
+            },
+            {
+                "name": "playlist1",
+                "songs": [],
+                "public": false,
+                "receivedFrom": "test",
+                "receivedAt": "2026-02-12T15:18:14.568Z"
+            },
+            {
+                "name": "hohoho",
+                "songs": [],
+                "public": false
+            }
+        ],
         "server1": [],
         "ssssssssss": []
     }
