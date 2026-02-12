@@ -1,3 +1,4 @@
+// Returns an array of all user objects from the user data file
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -45,9 +46,17 @@ export function saveUsers(data: any) {
 }
 
 // ==================== PLAYLISTS (playlistsByUser) ====================
-export type PlaylistDB = {
-    playlistsByUser: Record<string, { name: string; songs: any[] }[]>;
+
+export type Playlist = {
+    name: string;
+    songs: any[];
+    public: boolean;
 };
+
+export type PlaylistDB = {
+    playlistsByUser: Record<string, Playlist[]>;
+};
+
 
 export function loadPlaylists(): PlaylistDB {
     // Sicherstellen, dass Datei existiert und richtige Struktur hat
@@ -61,9 +70,22 @@ export function loadPlaylists(): PlaylistDB {
         savePlaylists(db);
     }
 
+    // Ensure all playlists have the 'public' flag (default: false)
+    for (const user in db.playlistsByUser) {
+        db.playlistsByUser[user] = db.playlistsByUser[user].map((pl: any) => ({
+            ...pl,
+            public: typeof pl.public === "boolean" ? pl.public : false
+        }));
+    }
+    savePlaylists(db);
     return db;
 }
 
 export function savePlaylists(db: PlaylistDB) {
     saveJSON(playlistFile, db);
+}
+
+export function getAllUsers(): any[] {
+    const usersData = loadUsers();
+    return Array.isArray(usersData.users) ? usersData.users : [];
 }

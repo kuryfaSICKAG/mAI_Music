@@ -1,10 +1,25 @@
+
 import express, { type Request, type Response } from "express";
 import { loadUsers, saveUsers, loadPlaylists, savePlaylists } from "./Data/data.ts";
+import cluster from "cluster";
+import os from "os";
+
 
 const app = express();
 const PORT = 8080;
-
 app.use(express.json());
+
+// Multi-core support: Use Node.js cluster to fork workers
+if (cluster.isPrimary) {
+  const numCPUs = os.cpus().length;
+  for (let i = 0; i < numCPUs; i++) {
+    cluster.fork();
+  }
+  cluster.on("exit", (worker, code, signal) => {
+    console.log(`Worker ${worker.process.pid} died`);
+    cluster.fork(); // Restart worker
+  });
+} else {
 
 /* ========================================================================== */
 /*                                    ROOT                                    */
@@ -117,8 +132,9 @@ app.get("/playlist/:username", (req: Request, res: Response) => {
 });
 
 /* === 3) Playlist erstellen === */
+
 app.post("/playlist/create", (req: Request, res: Response) => {
-  const { username, name } = req.body;
+  const { username, name, public: isPublic = false } = req.body;
 
   if (!username || !name) {
     return res.status(400).json({ error: "username oder name fehlt" });
@@ -128,10 +144,10 @@ app.post("/playlist/create", (req: Request, res: Response) => {
   const arr = db.playlistsByUser[username] ?? [];
 
   if (arr.some((p: any) => p.name === name)) {
-    return res.status(409).json({ error: `Playlist "${name}" existiert bereits.` });
+    return res.status(409).json({ error: `Playlist \"${name}\" existiert bereits.` });
   }
 
-  const playlist = { name, songs: [] };
+  const playlist = { name, songs: [], public: !!isPublic };
   db.playlistsByUser[username] = [...arr, playlist];
 
   savePlaylists(db);
@@ -157,14 +173,15 @@ app.delete("/playlist/delete", (req: Request, res: Response) => {
 });
 
 /* === 5) Playlist umbenennen === */
+
 app.patch("/playlist/rename", (req: Request, res: Response) => {
-  const { username, oldName, newName } = req.body;
+  const { username, oldName, newName, public: isPublic } = req.body;
 
   const db = loadPlaylists();
   const arr = db.playlistsByUser[username] ?? [];
 
   if (arr.some((p: any) => p.name === newName)) {
-    return res.status(409).json({ error: `Playlist "${newName}" existiert bereits.` });
+    return res.status(409).json({ error: `Playlist \"${newName}\" existiert bereits.` });
   }
 
   const pl = arr.find((p: any) => p.name === oldName);
@@ -172,6 +189,7 @@ app.patch("/playlist/rename", (req: Request, res: Response) => {
   if (!pl) return res.status(404).json({ error: "Playlist nicht gefunden" });
 
   pl.name = newName;
+  if (typeof isPublic === "boolean") pl.public = isPublic;
   savePlaylists(db);
 
   res.json({ ok: true });
@@ -229,6 +247,18 @@ app.delete("/playlist/song/remove", (req: Request, res: Response) => {
 /*                                  SERVER START                              */
 /* ========================================================================== */
 
-app.listen(PORT, () => {
-  console.log(`Server läuft unter http://localhost:${PORT}`);
+
+  app.listen(PORT, () => {
+    console.log(`Worker ${process.pid} läuft unter http://localhost:${PORT}`);
+  });
+}
+/* ========================================================================== */
+/*                        GET ALL USER DATA (ADMIN/DEBUG)                     */
+/* ========================================================================== */
+
+// Returns all user data and their playlists (for admin/debug)
+app.get("/alluserdata", (_req: Request, res: Response) => {
+  const users = loadUsers();
+  const playlists = loadPlaylists();
+  res.json({ users, playlists });
 });

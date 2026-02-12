@@ -3,21 +3,25 @@
         "test": [
             {
                 "name": "playlist1",
-                "songs": []
+                "songs": [],
+                "public": false
             },
             {
                 "name": "weitere playlist",
-                "songs": []
+                "songs": [],
+                "public": false
             },
             {
                 "name": "kekw",
-                "songs": []
+                "songs": [],
+                "public": false
             }
         ],
         "test_": [
             {
                 "name": "Favorites",
-                "songs": []
+                "songs": [],
+                "public": false
             }
         ],
         "lol": [],
