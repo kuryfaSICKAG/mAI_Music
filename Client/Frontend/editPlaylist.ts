@@ -3,11 +3,7 @@ import { activeUser } from "./authenticate.ts";
 import { question, questionInt } from "readline-sync";
 import { drawPlaylist } from "./drawPlaylist.ts";
 import { formatPlaylists } from "../Backend/format.ts";
-
-type Playlist = {
-    name: string;
-    songs: any[];
-};
+import { type Playlist } from "../../models/personalModels.ts";
 
 export async function editPlaylist(name: string): Promise<void> {
     console.clear();
@@ -27,9 +23,10 @@ export async function editPlaylist(name: string): Promise<void> {
 
     const menu: number = questionInt(
         ">>> Playlist umbenennen (1)\n" +
-        ">>> Song hinzufügen (2)\n" +
-        ">>> Song entfernen (3)\n" +
-        ">>> Zurück (4)\n\n> "
+        ">>> Playlist öffentlich/privat stellen (2)\n" +
+        ">>> Song hinzufügen (3)\n" +
+        ">>> Song entfernen (4)\n" +
+        ">>> Zurück (5)\n\n> "
     );
 
     switch (menu) {
@@ -49,6 +46,14 @@ export async function editPlaylist(name: string): Promise<void> {
         }
 
         case 2: {
+            //Öffentlichkeitsstatus ändern
+
+            //console.log(`Aktueller Status:\n ${statusfunktion}`)
+            //hilfsfunktion für aktuellen status: server->hier
+            //hilfsfunktion für status ändern: hier->backend->server
+        }
+
+        case 3: {
             // Song hinzufügen
             const songName = question("Songname:\n> ");
             if (!songName.trim()) {
@@ -69,7 +74,7 @@ export async function editPlaylist(name: string): Promise<void> {
             return editPlaylist(name);
         }
 
-        case 3: {
+        case 4: {
             // Song löschen
             const playlists: Playlist[] = await getPlaylists(activeUser);
             const playlist = playlists.find((p: Playlist) => p.name === name);
@@ -96,7 +101,7 @@ export async function editPlaylist(name: string): Promise<void> {
             return editPlaylist(name);
         }
 
-        case 4:
+        case 5:
             return drawPlaylist(activeUser);
 
         default:

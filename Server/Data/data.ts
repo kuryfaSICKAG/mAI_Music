@@ -72,7 +72,7 @@ export function loadPlaylists(): PlaylistDB {
 
     // Ensure all playlists have the 'public' flag (default: false)
     for (const user in db.playlistsByUser) {
-        db.playlistsByUser[user] = db.playlistsByUser[user].map((pl: any) => ({
+        db.playlistsByUser[user] = db.playlistsByUser[user]!.map((pl: any) => ({
             ...pl,
             public: typeof pl.public === "boolean" ? pl.public : false
         }));

@@ -11,14 +11,14 @@ export async function drawOnline(activeUser : string){
 
     //benachrichtugung für erhaltene playlist
 
-    let menu : number = questionInt(">>> Playlists verschicken (1)\n>>> Playlists suchen (2)\n>>> Benachrichtugungen (3)\n>>> Zurück (4)\n\n> ")
+    let menu : number = questionInt(">>> Playlists verschicken (1)\n>>> Playlists suchen (2)\n>>> Benachrichtigungen (3)\n>>> Zurück (4)\n\n> ")
     
         switch(menu){
             case 1:
                 const playlists = await getPlaylists(activeUser);
                 console.log(formatPlaylists(playlists));
 
-                let name = question("~ Welche Playlist willst du bearbeiten?\n> ");
+                let name = question("~ Welche Playlist willst du verschicken?\n> ");
                 if (name === "") {
                     console.log("# Gib einen gültigen Namen ein!");
                     return drawOnline(activeUser);

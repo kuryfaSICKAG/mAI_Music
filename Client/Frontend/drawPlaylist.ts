@@ -3,11 +3,7 @@ import { drawMenu } from "./menu.ts";
 import { getPlaylists, createPlaylist, deletePlaylist } from "../Backend/playlist.ts";
 import { editPlaylist } from "./editPlaylist.ts";
 import { formatPlaylists } from "../Backend/format.ts";
-
-type Playlist = {
-  name: string;
-  songs: any[];
-};
+import { type Playlist } from "../../models/personalModels.ts";
 
 export async function drawPlaylist(activeUser: string): Promise<void> {
     console.clear();
