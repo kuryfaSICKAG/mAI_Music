@@ -15,11 +15,6 @@
                 "name": "kekw",
                 "songs": [],
                 "public": false
-            },
-            {
-                "name": "neu",
-                "songs": [],
-                "public": false
             }
         ],
         "test_": [
@@ -31,7 +26,7 @@
         ],
         "lol": [
             {
-                "name": "kekw",
+                "name": "lolololololololol",
                 "songs": [],
                 "public": false,
                 "receivedFrom": "test",
@@ -48,6 +43,13 @@
                 "name": "hohoho",
                 "songs": [],
                 "public": false
+            },
+            {
+                "name": "neu",
+                "songs": [],
+                "public": false,
+                "receivedFrom": "test",
+                "receivedAt": "2026-02-25T14:44:33.631Z"
             }
         ],
         "server1": [],

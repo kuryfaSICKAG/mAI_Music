@@ -71,19 +71,47 @@ export async function drawPlaylist(activeUser: string): Promise<void> {
             console.log("\n                     |========= Willkommen bei mAI music =========|");
             console.log(`\n------------------------\n${activeUser}'s Playlists\nPlaylist löschen\n------------------------`);
 
-            const lists = await getPlaylists(activeUser);
+            const lists: Playlist[] = await getPlaylists(activeUser);
+
+            // 🔥 1. Check: Gibt es überhaupt Playlists?
+            if (lists.length === 0) {
+                console.log("# Du hast keine Playlists zum Löschen!");
+                return drawPlaylist(activeUser);
+            }
+
             console.log(formatPlaylists(lists));
 
-            name = question("\n~ Welche Playlist willst du löschen?\n> ");
+            // 🔥 2. Playlistnamen abfragen
+            name = question("\n~ Welche Playlist willst du löschen?\n> ").trim();
+
             if (name === "") {
                 console.log("# Gib einen gültigen Namen ein!");
                 return drawPlaylist(activeUser);
             }
 
+            // 🔥 3. Check: Existiert die Playlist überhaupt?
+            const exists = lists.some(pl => pl.name === name);
+
+            if (!exists) {
+                console.log(`# Die Playlist "${name}" existiert nicht!`);
+                return drawPlaylist(activeUser);
+            }
+
+            // 🔥 4. Sicherheit: User fragen
+            const confirm = keyInYN(`Willst du die Playlist "${name}" wirklich löschen?`);
+
+            if (!confirm) {
+                console.log("Abgebrochen.");
+                return drawPlaylist(activeUser);
+            }
+
+            // 🔥 5. Löschen
             await deletePlaylist(activeUser, name);
+            console.log(`✔️ Playlist "${name}" wurde gelöscht.`);
 
             return drawPlaylist(activeUser);
         }
+
 
         case 4:
             return drawMenu(activeUser, true);

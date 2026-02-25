@@ -4,7 +4,7 @@ import { drawPlaylist } from "./drawPlaylist.ts";
 import { drawOnline } from "./online.ts";
 import { drawSong } from "./song.ts";
 
-function sleep(ms: number) {
+ export function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
