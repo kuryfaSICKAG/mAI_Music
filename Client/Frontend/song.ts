@@ -1,25 +1,20 @@
 import { question, questionInt } from "readline-sync";
+import { drawMenu } from "./menu.ts";
 
 
 export function drawSong(activeUser : string){
     console.clear();
     console.log("\n                     |========= Willkommen bei mAI music =========|");
-    console.log(`\n------------------------\n${activeUser} - Songs suchen nach Kriterien\n------------------------`);
+    console.log(`\n------------------------\n${activeUser} - Song-Suche\n------------------------`);
 
-    let menu : number = questionInt(">>> Titel (1)\n>>> Lyrics (2)\n>>> Künstler/Band (3)\n>>> Zurück (4)\n\n> ")
+    let menu : number = questionInt(">>> Suche starten (1)\n>>> Zurück (2)\n\n> ")
 
     switch(menu){
         case 1:
-            console.log("nach titel suchen")
+            console.log("suche nach...")
             break
         case 2:
-            console.log("nach lyrics suchen")
-            break
-        case 3:
-            console.log("nach künstler/band suchen")
-            break
-        case 4:
-            return drawSong(activeUser)
+            return drawMenu(activeUser, true)
         default:
             console.log("nöööö")
     }
