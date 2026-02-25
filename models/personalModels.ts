@@ -2,18 +2,21 @@ export interface DB {
   playlistsByUser: Record<string, Playlist[]>;
 }
 
+type Visibility = "private" | "public";
+
 export interface Playlist {
+  visibility: Visibility;
   name: string;
   songs: Song[];
 }
 
 export interface Song {
-    name: string,
-    artist: Artist[],
-    genre: Genre[],
-    year: number,
-    duration: number | string,
-    album?: Album,
+  name: string,
+  artist: Artist[],
+  genre: Genre[],
+  year: number,
+  duration: number | string,
+  album?: Album | undefined,
 }
 
 export interface Album {
@@ -22,25 +25,24 @@ export interface Album {
     genre: Genre[],
     year: number,
     songs: Song[],
-}
+} 
 
-export enum Genre {
-    pop,
-    rock,
-    metal,
-    rap,
-    techno,
-    classical,
-    jazz,
-    hiphop,
-    country,
-    reggae,
-    disco,
-    funk,
-    rnb,
-    soul,
-    indie,
-}
+export type Genre =
+  | "pop"
+  | "rock"
+  | "metal"
+  | "rap"
+  | "techno"
+  | "classical"
+  | "jazz"
+  | "hiphop"
+  | "country"
+  | "reggae"
+  | "disco"
+  | "funk"
+  | "rnb"
+  | "soul"
+  | "indie";
 
 export interface Artist {
     name: string,

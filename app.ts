@@ -1,3 +1,3 @@
-import { authenticate } from "./gui/authentication.ts";
+import { askConnection } from "./Client/Frontend/connect.ts";
 
-authenticate()
+askConnection()
