@@ -70,12 +70,19 @@ export async function getTrackFromID(songID:string) : Promise<string>{
         return "Unknown Title";
     }
 }
+
+export async function addToPlaylist(songID:string, playlist:string){
+
+}
+
+
 //example usage:
  let i = await searchSong("I could be yoshi");
  let j = question("\n>>> Möchtest du einen Song Hinzufügen? (y/n)");
 switch(j){
     case "y":
         let k = questionInt("\n>>> Bitte gib die Nummer des Songs ein, den du hinzufügen möchtest: ")
+        if(k<=0) break;
         let song = searchedSongs[k-1];
         if (song == null) {
             console.log("Ungültige Song-Nummer.");
@@ -92,7 +99,6 @@ switch(j){
         console.log("Ungültige Eingabe. Bitte versuche es erneut.")
 }
 
-// export function addToPlaylist
 
 // export function newPlaylist(name: string){
 
