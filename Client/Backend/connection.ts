@@ -17,6 +17,25 @@ export function setServerUrl(url: string) {
 }
 
 /**
+ * Drop-in-Ersatz für fetch() mit automatischem Retry bei ECONNRESET.
+ * Stale Verbindungen aus dem Keep-Alive-Pool verursachen ECONNRESET, wenn
+ * der Server die Verbindung wegen Inaktivität schließt. Ein einmaliger Retry
+ * öffnet dabei eine frische Verbindung.
+ */
+export async function safeFetch(url: string, options?: RequestInit): Promise<Response> {
+  try {
+    const res = await fetch(url, options);
+    return res;
+  } catch (err: any) {
+    if (err?.cause?.code === "ECONNRESET" || err?.cause?.code === "ECONNREFUSED") {
+      // Stale pooled connection – einmal neu versuchen
+      return fetch(url, options);
+    }
+    throw err;
+  }
+}
+
+/**
  * Plausibilitätscheck für Host/IP (IPv4, IPv6, Hostname) und Port
  */
 function isValidHost(host: string): boolean {
@@ -51,6 +70,7 @@ async function pingServer(baseUrl: string, timeoutMs = 3000): Promise<void> {
 
   try {
     const res = await fetch(`${baseUrl}/`, { signal: controller.signal });
+    await res.body?.cancel(); // consume body to release the pooled connection
     if (!res.ok) {
       throw new Error(`Ping fehlgeschlagen: HTTP ${res.status}`);
     }
