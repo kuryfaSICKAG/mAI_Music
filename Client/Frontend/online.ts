@@ -3,6 +3,7 @@ import { drawMenu } from "./menu.ts";
 import { getPlaylists } from "../Backend/playlist.ts";
 import { formatPlaylists } from "../Backend/format.ts";
 import { sendPlaylist } from "../Backend/onlineServices.ts";
+import { sleep } from "./menu.ts";
 
 export async function drawOnline(activeUser : string){
     console.clear();
@@ -33,7 +34,8 @@ export async function drawOnline(activeUser : string){
                 } else {
                     console.log("✔ " + result.message);
                 }
-                break
+                await sleep(500)
+                return drawOnline(activeUser)
             case 2:
                 //falls online/private playlists noch möglich sind
                 break
