@@ -1,6 +1,6 @@
 import { Router, type Request, type Response } from "express";
 import { loadPlaylists, savePlaylists } from "../Data/data.ts";
-import { deezer, findPlaylist, resolveEffectiveUsername, safeSongs, createId } from "../serverContext.ts";
+import { deezer, findPlaylist, resolveEffectiveUsername, safeSongs } from "../serverContext.ts";
 import { searchDeezer } from "../services/deezerSearch.ts";
 
 const playlistsRouter = Router();
@@ -87,25 +87,25 @@ playlistsRouter.patch("/playlist/rename", (req: Request, res: Response) => {
 });
 
 playlistsRouter.post("/playlist/song/add", (req: Request, res: Response) => {
-  const { username, playlistName, song, dedupe = true } = req.body;
+  const { username, playlistName, dedupe = true } = req.body;
+
+  const rawSongId = req.body?.songId ?? req.body?.song;
+  const songId =
+    typeof rawSongId === "string" || typeof rawSongId === "number"
+      ? String(rawSongId).trim()
+      : rawSongId && typeof rawSongId === "object" && rawSongId.id != null
+      ? String(rawSongId.id).trim()
+      : "";
 
   const { db, playlist: pl } = findPlaylist(username, playlistName);
   if (!pl) return res.status(404).json({ error: "Playlist nicht gefunden" });
+  if (!songId) return res.status(400).json({ error: "songId fehlt" });
 
-  if (
-    dedupe &&
-    pl.songs.some(
-      (s: any) =>
-        s.name?.toLowerCase?.() === song?.name?.toLowerCase?.() &&
-        s.year === song?.year &&
-        s.duration === song?.duration
-    )
-  ) {
+  if (dedupe && safeSongs(pl.songs).includes(songId)) {
     return res.json({ ok: true, skipped: true });
   }
 
-  const withId = song && typeof song === "object" ? { ...song, id: String(song.id ?? createId()) } : song;
-  pl.songs.push(withId);
+  pl.songs.push(songId);
   savePlaylists(db);
 
   return res.json({ ok: true });
@@ -140,7 +140,7 @@ playlistsRouter.delete("/playlist/song/:songId", (req: Request, res: Response) =
   if (!pl) return res.status(404).json({ error: "Playlist nicht gefunden" });
 
   const before = pl.songs.length;
-  pl.songs = safeSongs(pl.songs).filter((s: any) => String(s?.id ?? "") !== songId);
+  pl.songs = safeSongs(pl.songs).filter((id: string) => id !== songId);
 
   if (pl.songs.length === before) {
     return res.status(404).json({ error: "Song nicht gefunden" });
@@ -151,27 +151,9 @@ playlistsRouter.delete("/playlist/song/:songId", (req: Request, res: Response) =
 });
 
 playlistsRouter.patch("/playlist/song", (req: Request, res: Response) => {
-  const username = resolveEffectiveUsername(req, req.body?.username);
-  const playlistName = String(req.body?.playlistName ?? "").trim();
-  const songId = String(req.body?.songId ?? "").trim();
-  const patch = req.body?.patch;
-
-  if (!username || !playlistName || !songId || !patch || typeof patch !== "object") {
-    return res.status(400).json({ error: "username, playlistName, songId oder patch fehlt" });
-  }
-
-  const { db, playlist: pl } = findPlaylist(username, playlistName);
-  if (!pl) return res.status(404).json({ error: "Playlist nicht gefunden" });
-
-  const idx = safeSongs(pl.songs).findIndex((s: any) => String(s?.id ?? "") === songId);
-  if (idx < 0) {
-    return res.status(404).json({ error: "Song nicht gefunden" });
-  }
-
-  pl.songs[idx] = { ...pl.songs[idx], ...patch, id: songId };
-  savePlaylists(db);
-
-  return res.json({ ok: true, song: pl.songs[idx] });
+  return res.status(410).json({
+    error: "Song-Patch nicht mehr verfügbar. Playlists speichern nur Song-IDs.",
+  });
 });
 
 playlistsRouter.post("/playlist/song/quick-add", async (req: Request, res: Response) => {
@@ -209,44 +191,51 @@ playlistsRouter.post("/playlist/song/quick-add", async (req: Request, res: Respo
       return res.status(404).json({ error: "Kein Song gefunden" });
     }
 
-    const song = {
-      id: String(track.id),
-      name: track?.title || track?.title_short || track?.name || "",
-      artist: track?.artist?.name
-        ? [{ name: track.artist.name, nationality: "", age: 0, genre: [] }]
-        : [],
-      genre: [],
-      year: track?.release_date ? Number(String(track.release_date).slice(0, 4)) : 0,
-      duration: track?.duration ?? 0,
-      album: track?.album?.title
-        ? {
-            name: track.album.title,
-            artist: track?.artist?.name
-              ? [{ name: track.artist.name, nationality: "", age: 0, genre: [] }]
-              : [],
-            genre: [],
-            year: track?.release_date ? Number(String(track.release_date).slice(0, 4)) : 0,
-            songs: [],
-          }
-        : undefined,
-    };
+    const songId = String(track.id);
 
-    if (
-      dedupe &&
-      safeSongs(pl.songs).some(
-        (s: any) =>
-          String(s?.id ?? "") === song.id ||
-          (String(s?.name ?? "").toLowerCase() === String(song.name).toLowerCase() && Number(s?.year ?? 0) === song.year)
-      )
-    ) {
-      return res.json({ ok: true, skipped: true, song });
+    if (dedupe && safeSongs(pl.songs).includes(songId)) {
+      return res.json({ ok: true, skipped: true, songId });
     }
 
-    pl.songs.push(song);
+    pl.songs.push(songId);
     savePlaylists(db);
-    return res.status(201).json({ ok: true, song });
+    return res.status(201).json({
+      ok: true,
+      songId,
+      song: {
+        id: songId,
+        name: track?.title || track?.title_short || track?.name || "",
+        artist: track?.artist?.name ?? "",
+        album: track?.album?.title ?? "",
+        duration: Number(track?.duration ?? 0),
+      },
+    });
   } catch (error: any) {
     return res.status(502).json({ error: "Quick-Add fehlgeschlagen", detail: error?.message ?? "Unbekannter Fehler" });
+  }
+});
+
+playlistsRouter.get("/song/:songId", async (req: Request, res: Response) => {
+  try {
+    const songId = String(req.params.songId ?? "").trim();
+    if (!songId) {
+      return res.status(400).json({ error: "songId fehlt" });
+    }
+
+    const track = await deezer.lookupTrack(songId);
+    if (!track || !track.id) {
+      return res.status(404).json({ error: "Song nicht gefunden" });
+    }
+
+    return res.json({
+      id: String(track.id),
+      title: track?.title || track?.title_short || track?.name || "",
+      artist: track?.artist?.name ?? "",
+      album: track?.album?.title ?? "",
+      duration: Number(track?.duration ?? 0),
+    });
+  } catch (error: any) {
+    return res.status(502).json({ error: "Song konnte nicht geladen werden", detail: error?.message ?? "Unbekannter Fehler" });
   }
 });
 
@@ -290,7 +279,7 @@ playlistsRouter.get("/playlist/status/:username/:playlistName", (req: Request, r
 
 playlistsRouter.get("/playlists/public", (_req: Request, res: Response) => {
   const db = loadPlaylists();
-  const result: Array<{ username: string; name: string; songs: any[]; public: boolean }> = [];
+  const result: Array<{ username: string; name: string; songs: string[]; public: boolean }> = [];
 
   for (const username of Object.keys(db.playlistsByUser)) {
     const lists = db.playlistsByUser[username] ?? [];

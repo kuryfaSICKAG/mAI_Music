@@ -133,7 +133,7 @@ export function saveUsers(data: UsersDB) {
 
 export type Playlist = {
     name: string;
-    songs: any[];
+    songs: string[];
     public: boolean;
 };
 
@@ -160,7 +160,15 @@ export function loadPlaylists(): PlaylistDB {
         db.playlistsByUser[user] = userPlaylists.map((pl: any) => ({
             ...pl,
             name: typeof pl?.name === "string" ? pl.name : "Unbenannt",
-            songs: Array.isArray(pl?.songs) ? pl.songs : [],
+            songs: Array.isArray(pl?.songs)
+                ? pl.songs
+                    .map((song: any) => {
+                        if (typeof song === "string" || typeof song === "number") return String(song);
+                        if (song && typeof song === "object" && song.id != null) return String(song.id);
+                        return "";
+                    })
+                    .filter((id: string) => id.length > 0)
+                : [],
             public: typeof pl?.public === "boolean" ? pl.public : false
         }));
     }

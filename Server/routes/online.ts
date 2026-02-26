@@ -27,7 +27,7 @@ onlineRouter.post("/sendPlaylist", (req: Request, res: Response) => {
 
     const transferred = {
       name: targetName,
-      songs: safeSongs(source.songs).map((s: any) => ({ ...s })),
+      songs: [...safeSongs(source.songs)],
       public: typeof source.public === "boolean" ? source.public : false,
       receivedFrom: fromUser,
       receivedAt: new Date().toISOString(),

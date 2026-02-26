@@ -1,6 +1,6 @@
 import { Router, type Request, type Response } from "express";
 import { loadPlaylists, loadUsers } from "../Data/data.ts";
-import { findPlaylist, resolveEffectiveUsername, safeSongs } from "../serverContext.ts";
+import { deezer, findPlaylist, resolveEffectiveUsername, safeSongs } from "../serverContext.ts";
 import { searchDeezer } from "../services/deezerSearch.ts";
 
 const recommendationsRouter = Router();
@@ -18,16 +18,20 @@ recommendationsRouter.post("/recommendations/playlist", async (req: Request, res
     const { playlist } = findPlaylist(username, playlistName);
     if (!playlist) return res.status(404).json({ error: "Playlist nicht gefunden" });
 
-    const seeds = safeSongs(playlist.songs)
-      .slice(0, 3)
-      .map((s: any) => String(s?.name ?? "").trim())
-      .filter(Boolean);
+    const seedIds = safeSongs(playlist.songs).slice(0, 3);
+    const resolvedSeeds = await Promise.all(
+      seedIds.map(async (id) => {
+        const track = await deezer.lookupTrack(id);
+        return String(track?.title || track?.title_short || track?.name || "").trim();
+      })
+    );
+    const seeds = resolvedSeeds.filter(Boolean);
 
     if (seeds.length === 0) {
       return res.json({ ok: true, source: "playlist", recommendations: [] });
     }
 
-    const existing = new Set(safeSongs(playlist.songs).map((s: any) => String(s?.id ?? "")).filter(Boolean));
+    const existing = new Set(safeSongs(playlist.songs));
     const out: any[] = [];
     const seen = new Set<string>();
 
@@ -59,7 +63,12 @@ recommendationsRouter.get("/recommendations/user/:username", async (req: Request
 
     const playlists = loadPlaylists().playlistsByUser[username] ?? [];
     const favoriteSeed = user.favorites[0]?.name ? String(user.favorites[0].name) : "";
-    const playlistSeed = playlists[0]?.songs?.[0]?.name ? String(playlists[0].songs[0].name) : "";
+    const playlistSeedId = playlists[0]?.songs?.[0] ? String(playlists[0].songs[0]) : "";
+    let playlistSeed = "";
+    if (playlistSeedId) {
+      const track = await deezer.lookupTrack(playlistSeedId);
+      playlistSeed = String(track?.title || track?.title_short || track?.name || "").trim();
+    }
     const seed = favoriteSeed || playlistSeed;
 
     if (!seed) {

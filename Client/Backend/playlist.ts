@@ -53,11 +53,11 @@ export async function renamePlaylist(username: string, oldName: string, newName:
 }
 
 // 6) Song hinzufügen
-export async function addSong(username: string, playlistName: string, song: any) {
+export async function addSong(username: string, playlistName: string, songId: string) {
     const res = await safeFetch(`${base()}/playlist/song/add`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, playlistName, song })
+        body: JSON.stringify({ username, playlistName, songId })
     });
     await res.body?.cancel();
 }

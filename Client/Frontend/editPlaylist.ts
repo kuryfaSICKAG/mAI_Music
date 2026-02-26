@@ -55,22 +55,15 @@ export async function editPlaylist(name: string): Promise<void> {
 
         case 3: {
             // Song hinzufügen
-            const songName = question("Songname:\n> ");
-            if (!songName.trim()) {
-                console.log("# Ungültiger Name!");
+            const songId = question("Song-ID (Deezer Track ID):\n> ");
+            if (!songId.trim()) {
+                console.log("# Ungültige Song-ID!");
                 return editPlaylist(name);
             }
 
-            const year = questionInt("Jahr:\n> ");
-            const duration = questionInt("Dauer (Sekunden):\n> ");
+            await addSong(activeUser, name, songId.trim());
 
-            await addSong(activeUser, name, {
-                name: songName,
-                year,
-                duration
-            });
-
-            console.log(`\n✔ Song "${songName}" hinzugefügt!`);
+            console.log(`\n✔ Song-ID "${songId.trim()}" hinzugefügt!`);
             return editPlaylist(name);
         }
 
@@ -85,8 +78,8 @@ export async function editPlaylist(name: string): Promise<void> {
             }
 
             console.log("\nSongs:");
-            playlist.songs.forEach((s: any, i: number) => {
-                console.log(`${i}: ${s.name} (${s.year}) - ${s.duration}s`);
+            playlist.songs.forEach((songId: string, i: number) => {
+                console.log(`${i}: ${songId}`);
             });
 
             const idx = questionInt("\nWelchen Song löschen? (Index)\n> ");

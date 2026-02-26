@@ -70,8 +70,15 @@ export function resolveEffectiveUsername(req: Request, bodyUsername?: string): s
   return null;
 }
 
-export function safeSongs(songs: any): any[] {
-  return Array.isArray(songs) ? songs : [];
+export function safeSongs(songs: any): string[] {
+  if (!Array.isArray(songs)) return [];
+  return songs
+    .map((song: any) => {
+      if (typeof song === "string" || typeof song === "number") return String(song);
+      if (song && typeof song === "object" && song.id != null) return String(song.id);
+      return "";
+    })
+    .filter((id: string) => id.length > 0);
 }
 
 export function findPlaylist(username: string, playlistName: string) {

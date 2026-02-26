@@ -7,10 +7,13 @@ type Visibility = "private" | "public";
 export interface Playlist {
   visibility: Visibility;
   name: string;
-  songs: Song[];
+  songs: SongID[];
 }
 
+export type SongID = string;
+
 export interface Song {
+  id: SongID,
   name: string,
   artist: Artist[],
   genre: Genre[],
@@ -24,7 +27,7 @@ export interface Album {
     artist: Artist[],
     genre: Genre[],
     year: number,
-    songs: Song[],
+  songs: SongID[],
 } 
 
 export type Genre =
