@@ -4,52 +4,46 @@
             {
                 "name": "playlist1",
                 "songs": [],
-                "public": false
+                "status": "private"
             },
             {
                 "name": "weitere playlist",
                 "songs": [],
-                "public": false
+                "status": "private"
             },
             {
                 "name": "kekw",
                 "songs": [],
-                "public": false
+                "status": "public"
             }
         ],
         "test_": [
             {
                 "name": "Favorites",
                 "songs": [],
-                "public": false
+                "status": "private"
             }
         ],
         "lol": [
             {
                 "name": "lolololololololol",
                 "songs": [],
-                "public": false,
-                "receivedFrom": "test",
-                "receivedAt": "2026-02-12T15:16:53.621Z"
+                "status": "private"
             },
             {
                 "name": "playlist1",
                 "songs": [],
-                "public": false,
-                "receivedFrom": "test",
-                "receivedAt": "2026-02-12T15:18:14.568Z"
+                "status": "private"
             },
             {
                 "name": "hohoho",
                 "songs": [],
-                "public": false
+                "status": "private"
             },
             {
                 "name": "neu",
                 "songs": [],
-                "public": false,
-                "receivedFrom": "test",
-                "receivedAt": "2026-02-25T14:44:33.631Z"
+                "status": "private"
             }
         ],
         "server1": [],

@@ -1,6 +1,6 @@
 import { Router, type Request, type Response } from "express";
 import { loadPlaylists, loadUsers } from "../Data/data.ts";
-import { deezer, findPlaylist, resolveEffectiveUsername, safeSongs } from "../serverContext.ts";
+import { deezer, findPlaylist, resolveEffectiveUsername, saveSongs } from "../serverContext.ts";
 import { searchDeezer } from "../services/deezerSearch.ts";
 
 const recommendationsRouter = Router();
@@ -18,7 +18,7 @@ recommendationsRouter.post("/recommendations/playlist", async (req: Request, res
     const { playlist } = findPlaylist(username, playlistName);
     if (!playlist) return res.status(404).json({ error: "Playlist nicht gefunden" });
 
-    const seedIds = safeSongs(playlist.songs).slice(0, 3);
+    const seedIds = saveSongs(playlist.songs).slice(0, 3);
     const resolvedSeeds = await Promise.all(
       seedIds.map(async (id) => {
         const track = await deezer.lookupTrack(id);
@@ -31,7 +31,7 @@ recommendationsRouter.post("/recommendations/playlist", async (req: Request, res
       return res.json({ ok: true, source: "playlist", recommendations: [] });
     }
 
-    const existing = new Set(safeSongs(playlist.songs));
+    const existing = new Set(saveSongs(playlist.songs));
     const out: any[] = [];
     const seen = new Set<string>();
 

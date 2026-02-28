@@ -1,6 +1,8 @@
 import { type Request } from "express";
 import { DeezerAPI } from "../apiServices/deezerAPI/deezer.ts";
 import { loadPlaylists, loadUsers, saveUsers, type UserProfile, type UserRecord, type UsersDB } from "./Data/data.ts";
+import type { Status } from "../models/personalModels.ts";
+import { savePlaylists } from "./Data/data.ts";
 
 export const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 7;
 export const serverStartedAt = Date.now();
@@ -70,7 +72,7 @@ export function resolveEffectiveUsername(req: Request, bodyUsername?: string): s
   return null;
 }
 
-export function safeSongs(songs: any): string[] {
+export function saveSongs(songs: any): string[] {
   if (!Array.isArray(songs)) return [];
   return songs
     .map((song: any) => {
@@ -86,4 +88,48 @@ export function findPlaylist(username: string, playlistName: string) {
   const userPlaylists = db.playlistsByUser[username] ?? [];
   const playlist = userPlaylists.find((p: any) => p.name === playlistName);
   return { db, userPlaylists, playlist };
+}
+
+
+export function getPlaylistStatusServer(
+  username: string,
+  playlistName: string
+): Status | null {
+  const { playlist } = findPlaylist(username, playlistName);
+  if (!playlist) return null;
+  const v = (playlist as any).status;
+  if (v === "public" || v === "private") return v;
+  if (typeof (playlist as any).public === "boolean") {
+    return (playlist as any).public ? "public" : "private";
+  }
+  return "private";
+}
+
+export function setPlaylistStatusServer(
+  username: string,
+  playlistName: string,
+  status: Status
+): boolean {
+  if (status !== "public" && status !== "private") return false;
+
+  const { db, userPlaylists, playlist } = findPlaylist(username, playlistName);
+  if (!playlist) return false;
+
+  (playlist as any).status = status;
+  if ("public" in (playlist as any)) delete (playlist as any).public;
+
+  db.playlistsByUser[username] = userPlaylists;
+  savePlaylists(db);
+  return true;
+}
+
+export function togglePlaylistStatusServer(
+  username: string,
+  playlistName: string
+): Status | null {
+  const current = getPlaylistStatusServer(username, playlistName);
+  if (!current) return null;
+  const next: Status = current === "public" ? "private" : "public";
+  const ok = setPlaylistStatusServer(username, playlistName, next);
+  return ok ? next : null;
 }

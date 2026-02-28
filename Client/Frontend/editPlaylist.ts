@@ -1,4 +1,4 @@
-import { renamePlaylist, addSong, removeSongByIndex, getPlaylists } from "../Backend/playlist.ts";
+import { renamePlaylist, addSong, removeSongByIndex, getPlaylists, setPlaylistStatus, togglePlaylistStatus, getPlaylistStatus } from "../Backend/playlist.ts";
 import { activeUser } from "./authenticate.ts";
 import { question, questionInt } from "readline-sync";
 import { drawPlaylist } from "./drawPlaylist.ts";
@@ -46,12 +46,50 @@ export async function editPlaylist(name: string): Promise<void> {
         }
 
         case 2: {
-            //Öffentlichkeitsstatus ändern
+            try {
+                const current = await getPlaylistStatus(activeUser, name);
+                console.log(`\nAktueller Status: ${current === "public" ? "🔓 public" : "🔒 private"}`);
 
-            //console.log(`Aktueller Status:\n ${statusfunktion}`)
-            //hilfsfunktion für aktuellen status: server->hier
-            //hilfsfunktion für status ändern: hier->backend->server
-        }
+                const choice = questionInt(
+                "\nStatus ändern:\n" +
+                "  (1) Auf 'public' setzen\n" +
+                "  (2) Auf 'private' setzen\n" +
+                "  (3) Toggle (umschalten)\n" +
+                "  (4) Abbrechen\n\n> "
+                );
+
+                switch (choice) {
+                case 1: {
+                    const next = await setPlaylistStatus(activeUser, name, "public");
+                    console.log(`\n✔ Status auf '${next}' gesetzt.`);
+                    break;
+                }
+                case 2: {
+                    const next = await setPlaylistStatus(activeUser, name, "private");
+                    console.log(`\n✔ Status auf '${next}' gesetzt.`);
+                    break;
+                }
+                case 3: {
+                    const next = await togglePlaylistStatus(activeUser, name);
+                    console.log(`\n✔ Status umgeschaltet auf '${next}'.`);
+                    break;
+                }
+                case 4: {
+                    console.log("\nAbgebrochen.");
+                    break;
+                }
+                default: {
+                    console.log("\nUngültige Auswahl.");
+                    break;
+                }
+                }
+            } catch (e: any) {
+                console.log(`# Fehler: ${e?.message ?? "Konnte Status nicht ändern."}`);
+                // Optional: kurze Pause, damit die Meldung sichtbar bleibt
+                question("\n(Enter) weiter…");
+            }
+            return editPlaylist(name);
+            }
 
         case 3: {
             // Song hinzufügen

@@ -2,10 +2,10 @@ export interface DB {
   playlistsByUser: Record<string, Playlist[]>;
 }
 
-type Visibility = "private" | "public";
+export type Status = "private" | "public";
 
 export interface Playlist {
-  visibility: Visibility;
+  status: Status;
   name: string;
   songs: SongID[];
 }
