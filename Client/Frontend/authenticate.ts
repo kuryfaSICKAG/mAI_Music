@@ -74,7 +74,7 @@ export async function authenticate(): Promise<void> {
             break;
 
         default:
-            return;
+            return authenticate();
     }
 
     // Wenn erfolgreich eingeloggt → weiter ins Menü

@@ -15,6 +15,11 @@
                 "name": "kekw",
                 "songs": [],
                 "status": "public"
+            },
+            {
+                "name": "index",
+                "songs": [],
+                "status": "private"
             }
         ],
         "test_": [

@@ -13,7 +13,7 @@ export async function drawOnline(activeUser : string){
 
     //benachrichtugung für erhaltene playlist
 
-    let menu : number = questionInt(">>> Playlists verschicken (1)\n>>> Playlists suchen (2)\n>>> Benachrichtigungen (3)\n>>> Zurück (4)\n\n> ")
+    let menu : number = questionInt(">>> Playlists verschicken (1)\n>>> Playlists suchen (2)\n>>> Benachrichtigungen (3)\n>>> Zurück (0)\n\n> ")
     
     switch(menu){
         case 1:
@@ -135,7 +135,7 @@ export async function drawOnline(activeUser : string){
             //funktioniert aktuell nicht
             drawOnline(activeUser)
             break
-        case 4:
+        case 0:
             return drawMenu(activeUser, true)
         default:
             console.log("nöööö")

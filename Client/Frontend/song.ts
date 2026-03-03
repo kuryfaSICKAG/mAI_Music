@@ -7,13 +7,13 @@ export function drawSong(activeUser : string){
     console.log("\n                     |========= Willkommen bei mAI music =========|");
     console.log(`\n------------------------\n${activeUser} - Song-Suche\n------------------------`);
 
-    let menu : number = questionInt(">>> Suche starten (1)\n>>> Zurück (2)\n\n> ")
+    let menu : number = questionInt(">>> Suche starten (1)\n>>> Zurück (0)\n\n> ")
 
     switch(menu){
         case 1:
             console.log("suche nach...")
             break
-        case 2:
+        case 0:
             return drawMenu(activeUser, true)
         default:
             console.log("nöööö")
