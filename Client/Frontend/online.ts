@@ -100,35 +100,54 @@ export async function drawOnline(activeUser : string){
             console.log("\n                     |========= Öffentliche Playlist =========|\n");
             console.log(`| ${detail.playlist.name} (public) — ${detail.playlist.songs.length} Song(s) — by ${detail.username}`);
 
-            // Songs ausgeben (defensiv, falls strict Indexzugriffe aktiv sind)
-            if (Array.isArray(detail.playlist.songs) && detail.playlist.songs.length > 0) {
-                detail.playlist.songs.forEach((id, i) => {
-                if (typeof id === "string" && id.length > 0) {
-                    console.log(`  ${i}. Song-ID: ${id}`);
-                }
-                });
+            const songs = Array.isArray(detail.playlist.songs) ? detail.playlist.songs : [];
 
-                const si = questionInt("\nSong-Details ansehen? (Index, -1 = überspringen)\n> ");
-                if (Number.isInteger(si) && si >= 0 && si < detail.playlist.songs.length) {
-                const candidate = detail.playlist.songs[si];
-
-                // 💡 Hier nochmal absichern (wegen noUncheckedIndexedAccess)
-                if (typeof candidate === "string" && candidate.length > 0) {
-                    const info = await getSongInfoPublic(candidate);
-                    if (info.ok) {
-                    const s = info.song;
-                    console.log(`\nID: ${s.id}\nTitel: ${s.title}\nArtist: ${s.artist}\nAlbum: ${s.album}\nDauer: ${s.duration}s`);
-                    } else {
-                    console.log("\n# " + info.error);
-                    }
-                    question("\n(Enter) weiter…");
-                } else {
-                    console.log("\n# Ungültige Song-Auswahl.");
-                    question("\n(Enter) weiter…");
-                }
-                }
+            if (songs.length === 0) {
+                console.log("\n# Diese Playlist enthält keine Songs.");
+                question("\n(Enter) zurück…");
+                return drawOnline(activeUser);
             }
 
+            // 👉 Songs 1-basiert anzeigen
+            songs.forEach((id, i) => {
+                if (typeof id === "string" && id.length > 0) {
+                    console.log(`  ${i + 1}. Song-ID: ${id}`);
+                }
+            });
+
+            // 👉 1-basiert abfragen
+            const songNum = questionInt("\nSong-Details ansehen? (Nummer, 0 = überspringen)\n> ");
+
+            if (songNum === 0) return drawOnline(activeUser);
+
+            const si = songNum - 1; // 1 → 0
+
+            // 👉 Harte Grenzenprüfung
+            if (!Number.isInteger(songNum) || si < 0 || si >= songs.length) {
+                console.log("\n# Ungültige Nummer.");
+                question("\n(Enter) weiter…");
+                return drawOnline(activeUser);
+            }
+
+            const candidate = songs[si];
+
+            // 👉 wegen noUncheckedIndexedAccess zusätzlich absichern
+            if (typeof candidate !== "string" || candidate.length === 0) {
+                console.log("\n# Ungültige Song-Auswahl.");
+                question("\n(Enter) weiter…");
+                return drawOnline(activeUser);
+            }
+
+            const info = await getSongInfoPublic(candidate);
+
+            if (info.ok) {
+                const s = info.song;
+                console.log(`\nID: ${s.id}\nTitel: ${s.title}\nArtist: ${s.artist}\nAlbum: ${s.album}\nDauer: ${s.duration}s`);
+            } else {
+                console.log("\n# " + info.error);
+            }
+
+            question("\n(Enter) weiter…");
             return drawOnline(activeUser);
             }
         case 3:

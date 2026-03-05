@@ -13,7 +13,9 @@
             },
             {
                 "name": "kekw",
-                "songs": [],
+                "songs": [
+                    "hilfe"
+                ],
                 "status": "public"
             },
             {
