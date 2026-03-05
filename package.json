@@ -4,7 +4,10 @@
   "description": "",
   "main": "app.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:runner": "ts-node unit_tests/testRunner.ts"
   },
   "repository": {
     "type": "git",
@@ -23,9 +26,11 @@
     "@types/node": "^25.2.0",
     "@types/prompt-sync": "^4.2.3",
     "@types/readline-sync": "^1.4.8",
+    "@vitest/ui": "^1.0.4",
     "readline-sync": "^1.4.10",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^1.6.1"
   },
   "dependencies": {
     "express": "^5.2.1",
