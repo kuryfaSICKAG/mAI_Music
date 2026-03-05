@@ -22,9 +22,15 @@ onlineRouter.post("/sendPlaylist", (req: Request, res: Response) => {
       return res.status(404).json({ error: "Quell-Playlist nicht gefunden" });
     }
 
-    const targetName = toArr.some((p: any) => p.name === source.name)
-      ? `${source.name} (from ${fromUser})`
-      : source.name;
+    // Playlist existiert beim Ziel bereits → Abbrechen
+    if (toArr.some((p: any) => p.name === playlistName)) {
+      return res.status(409).json({
+        ok: false,
+        error: `Playlist '${playlistName}' existiert bei '${toUser}' bereits.`
+      });
+    }
+
+    const targetName = playlistName; // kein Rename mehr
 
     // Status sauber ableiten (Migration: altes public:boolean -> status)
     const status: Status =
@@ -47,8 +53,8 @@ onlineRouter.post("/sendPlaylist", (req: Request, res: Response) => {
     return res.json({
       ok: true,
       message: `Playlist '${source.name}' wurde an '${toUser}' gesendet.`,
-      receivedAs: targetName,
     });
+
   } catch {
     return res.status(500).json({ error: "Playlist konnte nicht gesendet werden" });
   }
