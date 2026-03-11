@@ -19,6 +19,7 @@ export async function drawAI(activeUser : string){
         const playlistName = await ask("Wie soll die Playlist heißen?");
         const prompt = await ask("Bitte geben Sie einen Prompt ein:")
         await createAIPlaylist(activeUser, playlistName, prompt);
+        return drawAI(activeUser);
     }
     else if(choice === "playlist"){
         const lists = await getPlaylists(activeUser);
@@ -29,15 +30,17 @@ export async function drawAI(activeUser : string){
 
         const playlist = await askChoice(
             "Welche Playlist?",
-            lists.map(pl => ({
+            [...lists.map(pl => ({
                 name: `${pl.name} (${pl.songs.length} Songs)`,
                 value: pl.name
-            }))
+            })),{ name: "Abbrechen", value: "cancel" }]
         );
+        if (playlist === "cancel") return drawAI(activeUser);
         
             const newPlaylistName = await ask("Wie soll die Playlist heißen?");
             await AIPlaylistFromPlaylist(activeUser, newPlaylistName, playlist);
         }
+        return drawAI(activeUser);
     }
     else return drawMenu(activeUser, true)
 

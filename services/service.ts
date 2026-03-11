@@ -451,39 +451,3 @@ export async function AIPlaylistFromPlaylist(username: string, newPlaylistName: 
         return false;
     }
 }
-/*await searchSong("I could be yoshi");
-const j = await ask("\n>>> Möchtest du einen Song Hinzufügen? (y/n)");
-switch(j){
-    case "y": {
-        const k = await askInt("\n>>> Bitte gib die Nummer des Songs ein, den du hinzufügen möchtest: ");
-        if(k<=0) break;
-        const song = searchedSongs[k-1];
-        if (song == null) {
-            console.log("Ungültige Song-Nummer.");
-            break;
-        }
-        const songId = String(song);
-        console.log("Song Ausgabe aus ID: ")
-        outputTrackFromID(songId)
-        const title = await getTrackArtistFromID(songId);
-        const result = await addToPlaylist(songId, "kekw", "test");
-        if (result === "added") {
-            console.log(`Du hast den Song "${title}" mit der ID ${songId} hinzugefügt!`);
-        } else if (result === "exists") {
-            console.log(`Der Song "${title}" mit der ID ${songId} ist bereits in der Playlist.`);
-        } else {
-            console.log("Song konnte nicht gespeichert werden (User/Playlist prüfen).");
-        }
-        break;
-    }
-    case "n":
-        console.log("Okay, kein Problem!");
-        break;
-    default:
-        console.log("Ungültige Eingabe. Bitte versuche es erneut.");
-    
-}
-}*/
-
-//await createAIPlaylist("test", "Chilllyyy Vibes", "entspannte, ruhige Musik mit akustischen Instrumenten und sanften Vocals");
-await AIPlaylistFromPlaylist("test", "AI Remix von Vibes", "Chilllyyy Vibes");

@@ -48,13 +48,13 @@ export async function drawSong(activeUser: string): Promise<void> {
     if (!doAdd) return drawSong(activeUser);
 
     const songId = await askChoice("Song auswählen:", [
-      { name: "❌ Abbrechen", value: "__cancel__" },
-      ...resultChoices
+        ...resultChoices,
+        { name: "❌ Abbrechen", value: "cancel" }
     ]);
 
     console.log(""); // <<< extra Leerzeile
 
-    if (songId === "__cancel__") return drawSong(activeUser);
+    if (songId === "cancel") return drawSong(activeUser);
 
     const playlists = await getPlaylists(activeUser);
     if (!playlists.length) {
