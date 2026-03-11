@@ -59,6 +59,16 @@
                 "onboardingDone": false
             },
             "favorites": []
+        },
+        {
+            "username": "1234",
+            "password": "1234",
+            "profile": {
+                "favoriteGenres": [],
+                "locale": "de-DE",
+                "onboardingDone": false
+            },
+            "favorites": []
         }
     ],
     "authSessions": [
