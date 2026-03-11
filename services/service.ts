@@ -135,6 +135,11 @@ export async function getTrackNameFromID(songID:string) : Promise<string>{
     }
 }
 
+// Backward compatibility for existing callers/tests.
+export async function getTrackFromID(songID: string): Promise<string> {
+    return getTrackNameFromID(songID);
+}
+
 export async function getTrackArtistFromID(songID:string) : Promise<string>{
     const api = new DeezerAPI();
     try{
@@ -310,7 +315,7 @@ export async function createAIPlaylist(username: string, playlistName: string, m
         
         // Step 4: Frage ob Playlist erstellt werden soll
         console.log(`\n`);
-        const confirm = question(`Soll die Playlist "${playlistName}" zum Account "${username}" hinzugefügt werden? (y/n): `);
+        const confirm = await ask(`Soll die Playlist "${playlistName}" zum Account "${username}" hinzugefügt werden? (y/n): `);
         
         if (confirm.toLowerCase() !== 'y') {
             console.log("Playlist wurde nicht erstellt.");
@@ -361,6 +366,101 @@ export async function createAIPlaylist(username: string, playlistName: string, m
 }
 
 
+export async function AIPlaylistFromPlaylist(username: string, newPlaylistName: string, basePlaylistName: string){
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+        console.error("Fehler: OPENAI_API_KEY ist nicht in der .env Datei gesetzt.");
+        return false;
+    }
+
+    try {
+        const currentFile = fileURLToPath(import.meta.url);
+        const currentDir = path.dirname(currentFile);
+        const filePath = path.resolve(currentDir, "..", "Server", "Data", "playlist_data.json");
+
+        const raw = await fs.readFile(filePath, "utf8");
+        const data: any = JSON.parse(raw || "{}");
+        const userPlaylists = data?.playlistsByUser?.[username];
+
+        if (!Array.isArray(userPlaylists)) {
+            console.error(`User "${username}" wurde nicht gefunden.`);
+            return false;
+        }
+
+        const basePlaylist = userPlaylists.find(
+            (p: any) => String(p?.name ?? "").trim().toLowerCase() === basePlaylistName.trim().toLowerCase()
+        );
+
+        if (!basePlaylist) {
+            console.error(`Basis-Playlist "${basePlaylistName}" wurde nicht gefunden.`);
+            return false;
+        }
+
+        const songIds: string[] = Array.isArray(basePlaylist.songs)
+            ? Array.from(new Set(basePlaylist.songs.map((id: any) => String(id).trim()).filter((id: string) => id.length > 0)))
+            : [];
+
+        if (songIds.length === 0) {
+            console.error(`Basis-Playlist "${basePlaylistName}" enthält keine Songs.`);
+            return false;
+        }
+
+        const deezerApi = new DeezerAPI();
+        const sourceSongs: string[] = [];
+
+        for (const songId of songIds.slice(0, 25)) {
+            try {
+                const track = await deezerApi.lookupTrack(songId);
+                const title = track?.title || track?.title_short || track?.name;
+                const artist = track?.artist?.name || track?.artist_name;
+                if (title && artist) {
+                    sourceSongs.push(`${title} - ${artist}`);
+                }
+            } catch {
+                // einzelne fehlerhafte IDs überspringen
+            }
+        }
+
+        if (sourceSongs.length === 0) {
+            console.error("Die Songs der Basis-Playlist konnten nicht aufgelöst werden.");
+            return false;
+        }
+
+        console.log(`\n🧠 Analysiere Playlist "${basePlaylistName}" und erstelle einen Musik-Prompt...`);
+
+        const client = new OpenAI({ apiKey });
+        const completion = await client.chat.completions.create({
+            model: "gpt-4o-mini",
+            temperature: 0.6,
+            max_tokens: 180,
+            messages: [
+                {
+                    role: "system",
+                    content:
+                        "Du analysierst Songlisten und erstellst einen kurzen, praezisen Musik-Prompt fuer die Generierung aehnlicher Songs. Gib nur den finalen Prompt aus, ohne Erklaerung.",
+                },
+                {
+                    role: "user",
+                    content:
+                        `Analysiere diese Playlist-Songs und erstelle einen kompakten Simplen Prompt unter 15 Worten fuer aehnliche Song-Empfehlungen (Stimmung, Tempo, Genre, Vibe). Benutze nicht phrasen, wie "Erstelle eine Playlist" sondern beschreibe nur die Songs:\n\n${sourceSongs.join("\n")}`,
+                },
+            ],
+        });
+
+        const generatedPrompt = String(completion.choices?.[0]?.message?.content ?? "").trim();
+
+        if (!generatedPrompt) {
+            console.error("KI konnte keinen Prompt aus der Basis-Playlist erzeugen.");
+            return false;
+        }
+
+        console.log(`\n📝 Generierter Prompt: ${generatedPrompt}`);
+        return await createAIPlaylist(username, newPlaylistName, generatedPrompt);
+    } catch (err: any) {
+        console.error("Fehler in AIPlaylistFromPlaylist:", err?.message || err);
+        return false;
+    }
+}
 /*await searchSong("I could be yoshi");
 const j = await ask("\n>>> Möchtest du einen Song Hinzufügen? (y/n)");
 switch(j){
@@ -395,13 +495,5 @@ switch(j){
 }
 }*/
 
-
-// export function newPlaylist(name: string){
-
-// }
-
-// export function createAIPlaylist(name: string, mood: string){
-
-
-
-// }
+//await createAIPlaylist("test", "Chilllyyy Vibes", "entspannte, ruhige Musik mit akustischen Instrumenten und sanften Vocals");
+//await AIPlaylistFromPlaylist("test", "AI Remix von Vibes", "Chilllyyy Vibes");
