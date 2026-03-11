@@ -3,6 +3,7 @@ import { ask, askChoice, askConfirm } from "../../services/prompt.ts";
 import { formatPlaylists } from "../Backend/format.ts";
 import { getPlaylists } from "../Backend/playlist.ts";
 import { drawMenu } from "./menu.ts";
+import { createAIPlaylist, AIPlaylistFromPlaylist} from "../../services/service.ts";
 
 export async function drawAI(activeUser : string){
     console.clear();
@@ -15,7 +16,9 @@ export async function drawAI(activeUser : string){
     ]);
 
     if(choice === "prompt"){
-        const prompt = ask("Bitte geben Sie einen Prompt ein:")
+        const playlistName = await ask("Wie soll die Playlist heißen?");
+        const prompt = await ask("Bitte geben Sie einen Prompt ein:")
+        await createAIPlaylist(activeUser, playlistName, prompt);
     }
     else if(choice === "playlist"){
         const lists = await getPlaylists(activeUser);
@@ -31,7 +34,9 @@ export async function drawAI(activeUser : string){
                 value: pl.name
             }))
         );
-        console.log(`Ausgewählt: ${playlist}`);
+        
+            const newPlaylistName = await ask("Wie soll die Playlist heißen?");
+            await AIPlaylistFromPlaylist(activeUser, newPlaylistName, playlist);
         }
     }
     else return drawMenu(activeUser, true)
