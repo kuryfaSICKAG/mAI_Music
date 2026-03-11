@@ -210,41 +210,6 @@ export async function addToPlaylist(songID: string, playlistName: string, userNa
     }
 }
 
-
-await searchSong("I could be yoshi");
-const j = question("\n>>> Möchtest du einen Song Hinzufügen? (y/n)");
-switch(j){
-    case "y": {
-        const k = questionInt("\n>>> Bitte gib die Nummer des Songs ein, den du hinzufügen möchtest: ");
-        if(k<=0) break;
-        const song = searchedSongs[k-1];
-        if (song == null) {
-            console.log("Ungültige Song-Nummer.");
-            break;
-        }
-        const songId = String(song);
-        console.log("Song Ausgabe aus ID: ")
-        outputTrackFromID(songId)
-        const title = await getTrackArtistFromID(songId);
-        const result = await addToPlaylist(songId, "kekw", "test");
-        if (result === "added") {
-            console.log(`Du hast den Song "${title}" mit der ID ${songId} hinzugefügt!`);
-        } else if (result === "exists") {
-            console.log(`Der Song "${title}" mit der ID ${songId} ist bereits in der Playlist.`);
-        } else {
-            console.log("Song konnte nicht gespeichert werden (User/Playlist prüfen).");
-        }
-        break;
-    }
-    case "n":
-        console.log("Okay, kein Problem!");
-        break;
-    default:
-        console.log("Ungültige Eingabe. Bitte versuche es erneut.");
-    
-}
-
-
 // export function newPlaylist(name: string){
     
 // }
@@ -393,4 +358,38 @@ export async function createAIPlaylist(username: string, playlistName: string, m
         console.error("❌ Fehler in createAIPlaylist:", err?.message || err);
         return false;
     }
+}
+
+
+await searchSong("I could be yoshi");
+const j = question("\n>>> Möchtest du einen Song Hinzufügen? (y/n)");
+switch(j){
+    case "y": {
+        const k = questionInt("\n>>> Bitte gib die Nummer des Songs ein, den du hinzufügen möchtest: ");
+        if(k<=0) break;
+        const song = searchedSongs[k-1];
+        if (song == null) {
+            console.log("Ungültige Song-Nummer.");
+            break;
+        }
+        const songId = String(song);
+        console.log("Song Ausgabe aus ID: ")
+        outputTrackFromID(songId)
+        const title = await getTrackArtistFromID(songId);
+        const result = await addToPlaylist(songId, "kekw", "test");
+        if (result === "added") {
+            console.log(`Du hast den Song "${title}" mit der ID ${songId} hinzugefügt!`);
+        } else if (result === "exists") {
+            console.log(`Der Song "${title}" mit der ID ${songId} ist bereits in der Playlist.`);
+        } else {
+            console.log("Song konnte nicht gespeichert werden (User/Playlist prüfen).");
+        }
+        break;
+    }
+    case "n":
+        console.log("Okay, kein Problem!");
+        break;
+    default:
+        console.log("Ungültige Eingabe. Bitte versuche es erneut.");
+    
 }
