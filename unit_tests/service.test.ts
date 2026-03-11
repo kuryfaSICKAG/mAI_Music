@@ -4,7 +4,7 @@ import {
   getSearchedSongs,
   clearSearchedSongs,
   searchSong,
-  getTrackFromID,
+  getTrackNameFromID,
 } from '../services/service.ts';
 import { DeezerAPI } from '../apiServices/deezerAPI/deezer.ts';
 
@@ -196,7 +196,7 @@ describe('Service Module', () => {
     });
   });
 
-  describe('getTrackFromID', () => {
+  describe('getTrackNameFromID', () => {
     it('should fetch track title by ID', async () => {
       const mockTrack = {
         id: '123',
@@ -210,7 +210,7 @@ describe('Service Module', () => {
 
       deezerMock.mockImplementation(() => mockInstance);
 
-      const title = await getTrackFromID('123');
+      const title = await getTrackNameFromID('123');
 
       expect(title).toBe('Test Track');
     });
@@ -227,7 +227,7 @@ describe('Service Module', () => {
 
       deezerMock.mockImplementation(() => mockInstance);
 
-      const title = await getTrackFromID('123');
+      const title = await getTrackNameFromID('123');
 
       expect(title).toBe('Short Title');
     });
@@ -244,7 +244,7 @@ describe('Service Module', () => {
 
       deezerMock.mockImplementation(() => mockInstance);
 
-      const title = await getTrackFromID('123');
+      const title = await getTrackNameFromID('123');
 
       expect(title).toBe('Name Field');
     });
@@ -263,7 +263,7 @@ describe('Service Module', () => {
 
       deezerMock.mockImplementation(() => mockInstance);
 
-      const title = await getTrackFromID('123');
+      const title = await getTrackNameFromID('123');
 
       expect(title).toBe('Nested Title');
     });
@@ -275,7 +275,7 @@ describe('Service Module', () => {
 
       deezerMock.mockImplementation(() => mockInstance);
 
-      const title = await getTrackFromID('999');
+      const title = await getTrackNameFromID('999');
 
       expect(title).toBe('Unknown Title');
     });
@@ -287,7 +287,7 @@ describe('Service Module', () => {
 
       deezerMock.mockImplementation(() => mockInstance);
 
-      const title = await getTrackFromID('123');
+      const title = await getTrackNameFromID('123');
 
       expect(title).toBe('Unknown Title');
     });
@@ -299,7 +299,7 @@ describe('Service Module', () => {
 
       deezerMock.mockImplementation(() => mockInstance);
 
-      const title = await getTrackFromID('123');
+      const title = await getTrackNameFromID('123');
 
       expect(title).toBe('Unknown Title');
     });

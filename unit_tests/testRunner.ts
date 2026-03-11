@@ -173,6 +173,8 @@ class TestRunner {
         ? '🎵'
         : name.includes('service')
         ? '🔧'
+        : name.includes('ai')
+        ? '🤖'
         : name.includes('playlist')
         ? '📝'
         : name.includes('model')
