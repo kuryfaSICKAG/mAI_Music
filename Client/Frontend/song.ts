@@ -1,58 +1,95 @@
-import { ask, askInt, askPassword } from "../../services/prompt.ts";
+import { ask, askChoice, askConfirm, waitEnter } from "../../services/prompt.ts";
 import { drawMenu } from "./menu.ts";
 import { searchSong, addToPlaylist, getTrackNameFromID } from "../../services/service.ts";
 import { getPlaylists } from "../Backend/playlist.ts";
 import { formatPlaylists } from "../Backend/format.ts";
+import { header } from "../../services/header.ts";
 
-export async function drawSong(activeUser : string){
-    console.clear();
-    console.log("\n                     |========= Willkommen bei mAI music =========|");
-    console.log(`\n------------------------\n${activeUser} - Song-Suche\n------------------------`);
+export async function drawSong(activeUser: string): Promise<void> {
+  console.clear();
+  header(`${activeUser} - Song-Suche`);
 
-    let menu : number = await askInt(">>> Suche starten (1)\n>>> Zurück (0)\n\n> ")
+  // Schönes Menü statt Nummern
+  const action = await askChoice("Aktion auswählen:", [
+    { name: "🎵 Suche starten", value: "search" },
+    { name: "⬅️  Zurück", value: "back" }
+  ]);
 
-    switch(menu){
-        case 1:
-            console.log(activeUser)
-            let search = ask("Suchkriterien eingeben:")
-            let searchResults = await searchSong(await search)
-            const j = await ask("\n>>> Möchtest du einen Song Hinzufügen? (y/n)");
-            switch(j){
-                case "y": {
-                    const k = await askInt("\n>>> Bitte gib die Nummer des Songs ein, den du hinzufügen möchtest: ");
-                    if(k<=0) break;
-                    const song = searchResults[k-1];
-                    if (song == null) {
-                        console.log("Ungültige Song-Nummer.");
-                        break;
-                    }
-                    const songId = String(song);
-                    const title = await getTrackNameFromID(songId);
-                    const lists = await getPlaylists(activeUser);
-                    if (lists.length === 0) console.log("Keine Playlists vorhanden.");
-                    else console.log(formatPlaylists(lists));
-                    const playlistNr = await askInt("Gib die Nummer der Playlist ein, zu der du den Song hinzufügen möchtest: ");
-                    const playlistName = lists[playlistNr-1]?.name;
-                    if (!playlistName) {
-                        console.log("Ungültige Playlist-Nummer.");
-                        break;
-                    }
-                    const addResult = await addToPlaylist(songId, playlistName, activeUser)
-                    if (addResult === "added") {
-                        console.log(`Du hast den Song "${title}" mit der ID "${songId}" zu ${playlistName} hinzugefügt!`);
-                    } else if (addResult === "exists") {
-                        console.log(`Der Song "${title}" mit der ID ${songId} ist bereits in der Playlist ${playlistName}.`);
-                    } else {
-                        console.log("Song konnte nicht gespeichert werden (User/Playlist prüfen).");
-                    }
-                    return drawSong(activeUser)
-                }
-            }
-            
-            break
-        case 0:
-            return drawMenu(activeUser, true)
-        default:
-            console.log("nöööö")
+  if (action === "back") {
+    return drawMenu(activeUser, true);
+  }
+
+  if (action === "search") {
+    const query = await ask("Suchkriterien eingeben:");
+
+    // Suche ausführen
+    const searchResults = await searchSong(query);
+
+    if (!searchResults || searchResults.length === 0) {
+      console.log("Keine Ergebnisse gefunden.");
+      await waitEnter();
+      return drawSong(activeUser);
     }
+
+    // Ergebnisauswahl als Liste
+    const choiceList = await Promise.all(
+      searchResults.map(async (raw, i) => {
+        const id = String(raw);
+        const title = await getTrackNameFromID(id);
+        return {
+          name: `${i + 1}. ${title} (${id})`,
+          value: id
+        };
+      })
+    );
+
+    const doAdd = await askConfirm("Möchtest du einen Song hinzufügen?");
+    if (!doAdd) return drawSong(activeUser);
+
+    const chosenSongId = await askChoice(
+      "Welchen Song möchtest du hinzufügen?",
+      [
+        { name: "❌ Abbrechen", value: "__cancel__" as any },
+        ...choiceList
+      ]
+    );
+
+    if (chosenSongId === "__cancel__") return drawSong(activeUser);
+
+    const songTitle = await getTrackNameFromID(chosenSongId);
+
+    // Playlists anzeigen
+    const playlists = await getPlaylists(activeUser);
+
+    if (playlists.length === 0) {
+      console.log("Keine Playlists vorhanden.");
+      await waitEnter();
+      return drawSong(activeUser);
+    }
+
+    console.log("\nDeine Playlists:\n");
+    console.log(formatPlaylists(playlists));
+
+    // Playlist als Liste auswählen
+    const playlistName = await askChoice(
+      "Zu welcher Playlist hinzufügen?",
+      playlists.map(pl => ({
+        name: `${pl.name} (${pl.songs.length} Songs)`,
+        value: pl.name
+      }))
+    );
+
+    const result = await addToPlaylist(chosenSongId, playlistName, activeUser);
+
+    if (result === "added") {
+      console.log(`✔ "${songTitle}" wurde zu "${playlistName}" hinzugefügt!`);
+    } else if (result === "exists") {
+      console.log(`⚠ "${songTitle}" ist dort bereits vorhanden.`);
+    } else {
+      console.log("❌ Fehler beim Speichern.");
+    }
+
+    await waitEnter();
+    return drawSong(activeUser);
+  }
 }
