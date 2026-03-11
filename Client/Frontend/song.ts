@@ -1,76 +1,70 @@
 import { ask, askChoice, askConfirm, waitEnter } from "../../services/prompt.ts";
 import { drawMenu } from "./menu.ts";
-import { searchSong, addToPlaylist, getTrackNameFromID } from "../../services/service.ts";
+import { searchSong, addToPlaylist, getTrackNameFromID, getTrackArtistFromID } from "../../services/service.ts";
 import { getPlaylists } from "../Backend/playlist.ts";
 import { formatPlaylists } from "../Backend/format.ts";
 import { header } from "../../services/header.ts";
 
 export async function drawSong(activeUser: string): Promise<void> {
   console.clear();
-  header(`${activeUser} - Song-Suche`);
+  header(`${activeUser} – Song-Suche`);
 
-  // Schönes Menü statt Nummern
   const action = await askChoice("Aktion auswählen:", [
     { name: "🎵 Suche starten", value: "search" },
     { name: "⬅️  Zurück", value: "back" }
   ]);
 
   if (action === "back") {
+    console.log(""); // <<< eine extra Leerzeile
     return drawMenu(activeUser, true);
   }
 
   if (action === "search") {
     const query = await ask("Suchkriterien eingeben:");
-
-    // Suche ausführen
     const searchResults = await searchSong(query);
 
     if (!searchResults || searchResults.length === 0) {
-      console.log("Keine Ergebnisse gefunden.");
+      console.log("Keine Ergebnisse gefunden.\n");
       await waitEnter();
       return drawSong(activeUser);
     }
 
-    // Ergebnisauswahl als Liste
-    const choiceList = await Promise.all(
+    // Songliste (Titel + Artist)
+    const resultChoices = await Promise.all(
       searchResults.map(async (raw, i) => {
         const id = String(raw);
         const title = await getTrackNameFromID(id);
+        const artist = await getTrackArtistFromID(id);
         return {
-          name: `${i + 1}. ${title} (${id})`,
+          name: `${i + 1}. ${title} — ${artist} (${id})`,
           value: id
         };
       })
     );
 
     const doAdd = await askConfirm("Möchtest du einen Song hinzufügen?");
+    console.log(""); // <<< extra Leerzeile
+
     if (!doAdd) return drawSong(activeUser);
 
-    const chosenSongId = await askChoice(
-      "Welchen Song möchtest du hinzufügen?",
-      [
-        { name: "❌ Abbrechen", value: "__cancel__" as any },
-        ...choiceList
-      ]
-    );
+    const songId = await askChoice("Song auswählen:", [
+      { name: "❌ Abbrechen", value: "__cancel__" },
+      ...resultChoices
+    ]);
 
-    if (chosenSongId === "__cancel__") return drawSong(activeUser);
+    console.log(""); // <<< extra Leerzeile
 
-    const songTitle = await getTrackNameFromID(chosenSongId);
+    if (songId === "__cancel__") return drawSong(activeUser);
 
-    // Playlists anzeigen
     const playlists = await getPlaylists(activeUser);
-
-    if (playlists.length === 0) {
-      console.log("Keine Playlists vorhanden.");
+    if (!playlists.length) {
+      console.log("Keine Playlists vorhanden.\n");
       await waitEnter();
       return drawSong(activeUser);
     }
 
-    console.log("\nDeine Playlists:\n");
-    console.log(formatPlaylists(playlists));
+    console.log(formatPlaylists(playlists) + "\n");
 
-    // Playlist als Liste auswählen
     const playlistName = await askChoice(
       "Zu welcher Playlist hinzufügen?",
       playlists.map(pl => ({
@@ -79,14 +73,15 @@ export async function drawSong(activeUser: string): Promise<void> {
       }))
     );
 
-    const result = await addToPlaylist(chosenSongId, playlistName, activeUser);
+    const title = await getTrackNameFromID(songId);
+    const result = await addToPlaylist(songId, playlistName, activeUser);
 
     if (result === "added") {
-      console.log(`✔ "${songTitle}" wurde zu "${playlistName}" hinzugefügt!`);
+      console.log(`✔ "${title}" wurde zu "${playlistName}" hinzugefügt!\n`);
     } else if (result === "exists") {
-      console.log(`⚠ "${songTitle}" ist dort bereits vorhanden.`);
+      console.log(`⚠ "${title}" ist bereits in "${playlistName}".\n`);
     } else {
-      console.log("❌ Fehler beim Speichern.");
+      console.log("❌ Fehler beim Hinzufügen.\n");
     }
 
     await waitEnter();

@@ -16,6 +16,7 @@ import {
 } from "../../services/service.ts";
 import { header } from "../../services/header.ts";
 import chalk from "chalk";
+import { drawSong } from "./song.ts";
 
 export async function editPlaylist(name: string): Promise<void> {
   console.clear();
@@ -45,27 +46,34 @@ export async function editPlaylist(name: string): Promise<void> {
 
     console.log("\n" + statusLabel + "\n");
 
-    const statusChoice = await askChoice("Neuen Status wählen:", [
-      { name: "🔓 Public setzen", value: "public" },
-      { name: "🔒 Private setzen", value: "private" },
-      { name: "🔁 Umschalten (toggle)", value: "toggle" },
-      { name: "❌ Abbrechen", value: "cancel" }
-    ]);
+    const changeStatus = await askConfirm("Status ändern?")
 
-    if (statusChoice === "public")
-      await setPlaylistStatus(activeUser, name, "public");
-    else if (statusChoice === "private")
-      await setPlaylistStatus(activeUser, name, "private");
-    else if (statusChoice === "toggle")
-      await togglePlaylistStatus(activeUser, name);
-
-    return editPlaylist(name);
+    if(changeStatus){
+      await togglePlaylistStatus(activeUser, name)
+    }
+    else{
+      return editPlaylist(name)
+    }
   }
 
   if (action === "add") {
-    const id = await ask("Song-ID eingeben:");
-    await addSong(activeUser, name, id);
-    return editPlaylist(name);
+    const addChoice = await askChoice("Option wählen:", [
+      { name: "Song-ID eingeben", value: "useID" },
+      { name: "Song suchen", value: "goSearch" },
+      { name: "Abbrechen", value: "cancel" }
+    ])
+
+    if(addChoice === "useID"){
+      const id = await ask("Song-ID eingeben:");
+      await addSong(activeUser, name, id);
+      return editPlaylist(name);
+    }
+    else if(addChoice === "goSearch"){
+      return drawSong(activeUser)
+    }
+    else{
+      editPlaylist(name)
+    }
   }
 
   if (action === "remove") {
