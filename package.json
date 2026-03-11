@@ -1,0 +1,44 @@
+{
+  "name": "filmfinder",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.ts",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:runner": "ts-node unit_tests/testRunner.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kuryfaSICKAG/FilmFinder.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/kuryfaSICKAG/FilmFinder/issues"
+  },
+  "homepage": "https://github.com/kuryfaSICKAG/FilmFinder#readme",
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.2.0",
+    "@types/prompt-sync": "^4.2.3",
+    "@types/readline-sync": "^1.4.8",
+    "@vitest/ui": "^1.0.4",
+    "readline-sync": "^1.4.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "chalk": "^5.6.2",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "fs": "^0.0.1-security",
+    "inquirer": "^13.3.0",
+    "openai": "^6.27.0",
+    "path": "^0.12.7",
+    "prompt-sync": "^4.2.0"
+  }
+}
