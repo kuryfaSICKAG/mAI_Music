@@ -59,6 +59,16 @@
                 "onboardingDone": false
             },
             "favorites": []
+        },
+        {
+            "username": "1234",
+            "password": "1234",
+            "profile": {
+                "favoriteGenres": [],
+                "locale": "de-DE",
+                "onboardingDone": false
+            },
+            "favorites": []
         }
     ],
     "authSessions": [
@@ -75,10 +85,16 @@
             "expiresAt": "2026-03-12T13:26:55.556Z"
         },
         {
-            "token": "mmlwe8or-fd7jqgf6w3",
-            "createdAt": "2026-03-11T10:30:23.355Z",
-            "expiresAt": "2026-03-18T10:30:23.355Z",
-            "username": "test"
+            "token": "mmlzb767-61rvh5w757",
+            "username": "test",
+            "createdAt": "2026-03-11T11:52:00.271Z",
+            "expiresAt": "2026-03-18T11:52:00.271Z"
+        },
+        {
+            "token": "mmlzfpm8-gpic7jt2ea",
+            "createdAt": "2026-03-11T11:55:30.800Z",
+            "expiresAt": "2026-03-18T11:55:30.800Z",
+            "username": "1234"
         }
     ]
 }

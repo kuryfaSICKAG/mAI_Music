@@ -1,5 +1,6 @@
 {
     "playlistsByUser": {
+        "1234": [],
         "test": [
             {
                 "name": "playlist1",
@@ -8,14 +9,17 @@
             },
             {
                 "name": "weitere playlist",
-                "songs": [],
+                "songs": [
+                    "64537418"
+                ],
                 "status": "private"
             },
             {
                 "name": "kekw",
                 "songs": [
                     "hilfe",
-                    "3738916412"
+                    "3738916412",
+                    "679863352"
                 ],
                 "status": "public"
             },
