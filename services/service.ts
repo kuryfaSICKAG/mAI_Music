@@ -86,7 +86,42 @@ export async function searchSongInv(track: string): Promise<Array<string | numbe
 }
 
 
-export async function getTrackFromID(songID:string) : Promise<string>{
+export async function outputTrackFromID(songID:string){
+    const api = new DeezerAPI();
+    try{
+        const data = await api.lookupTrack(songID);
+        if(!data) return "Unknown Title";
+        // Deezer track objects usually expose `title` (or `name` / `title_short`)
+        const title = data.title || data.name || data.title_short || (data.track && (data.track.title || data.track.name));
+        if (data.artist && data.artist.name) {
+            console.log(`  Artist: ${data.artist.name}`);
+        } else if (data.artist) {
+            console.log(`  Artist: ${data.artist}`);
+        } else if (data.artist_name) {
+            console.log(`  Artist: ${data.artist_name}`);
+        }
+        if (data.album && data.album.title) {
+            console.log(`  Album: ${data.album.title}`);
+        } else if (data.album) {
+            console.log(`  Album: ${data.album}`);
+        } else if (data.album_title) {
+            console.log(`  Album: ${data.album_title}`);
+        }
+        if (data.duration) {
+            console.log(`  Duration: ${data.duration} seconds`);
+        }
+        if (data.id) {
+            console.log(`  ID: ${data.id}`);
+            searchedSongs.push(data.id);
+        }
+        console.log('---');
+    }
+    catch (err: any) {
+        console.error("getTrackFromID error:", err?.message || err);
+    }
+}
+
+export async function getTrackNameFromID(songID:string) : Promise<string>{
     const api = new DeezerAPI();
     try{
         const data = await api.lookupTrack(songID);
@@ -95,7 +130,35 @@ export async function getTrackFromID(songID:string) : Promise<string>{
         const title = data.title || data.name || data.title_short || (data.track && (data.track.title || data.track.name));
         return title || "Unknown Title";
     } catch (err: any) {
-        console.error("getTrackFromID error:", err?.message || err);
+        console.error("getTrackNameFromID error:", err?.message || err);
+        return "Unknown Title";
+    }
+}
+
+export async function getTrackArtistFromID(songID:string) : Promise<string>{
+    const api = new DeezerAPI();
+    try{
+        const data = await api.lookupTrack(songID);
+        if(!data) return "Unknown Title";
+        // Deezer track objects usually expose `title` (or `name` / `title_short`)
+        const artist = data.artist.name || data.artist || data.artist_name;
+        return artist || "Unknown Artist";
+    } catch (err: any) {
+        console.error("getTrackArtistFromID error:", err?.message || err);
+        return "Unknown Title";
+    }
+}
+
+export async function getTrackDurationFromID(songID:string) : Promise<string>{
+    const api = new DeezerAPI();
+    try{
+        const data = await api.lookupTrack(songID);
+        if(!data) return "Unknown Duration";
+        // Deezer track objects usually expose `title` (or `name` / `title_short`)
+        const title = data.duration;
+        return title || "Unknown Duration";
+    } catch (err: any) {
+        console.error("getTrackDurationFromID error:", err?.message || err);
         return "Unknown Title";
     }
 }
@@ -148,6 +211,38 @@ export async function addToPlaylist(songID: string, playlistName: string, userNa
 }
 
 
+await searchSong("I could be yoshi");
+const j = question("\n>>> Möchtest du einen Song Hinzufügen? (y/n)");
+switch(j){
+    case "y": {
+        const k = questionInt("\n>>> Bitte gib die Nummer des Songs ein, den du hinzufügen möchtest: ");
+        if(k<=0) break;
+        const song = searchedSongs[k-1];
+        if (song == null) {
+            console.log("Ungültige Song-Nummer.");
+            break;
+        }
+        const songId = String(song);
+        console.log("Song Ausgabe aus ID: ")
+        outputTrackFromID(songId)
+        const title = await getTrackArtistFromID(songId);
+        const result = await addToPlaylist(songId, "kekw", "test");
+        if (result === "added") {
+            console.log(`Du hast den Song "${title}" mit der ID ${songId} hinzugefügt!`);
+        } else if (result === "exists") {
+            console.log(`Der Song "${title}" mit der ID ${songId} ist bereits in der Playlist.`);
+        } else {
+            console.log("Song konnte nicht gespeichert werden (User/Playlist prüfen).");
+        }
+        break;
+    }
+    case "n":
+        console.log("Okay, kein Problem!");
+        break;
+    default:
+        console.log("Ungültige Eingabe. Bitte versuche es erneut.");
+    
+}
 
 
 // export function newPlaylist(name: string){
