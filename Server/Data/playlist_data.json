@@ -4,53 +4,79 @@
             {
                 "name": "playlist1",
                 "songs": [],
-                "public": false
+                "status": "private"
             },
             {
                 "name": "weitere playlist",
                 "songs": [],
-                "public": false
+                "status": "private"
             },
             {
                 "name": "kekw",
-                "songs": [],
-                "public": false
+                "songs": [
+                    "hilfe",
+                    "3738916412"
+                ],
+                "status": "public"
             },
             {
-                "name": "neu",
+                "name": "index",
                 "songs": [],
-                "public": false
+                "status": "private"
             }
         ],
         "test_": [
             {
                 "name": "Favorites",
                 "songs": [],
-                "public": false
+                "status": "private"
             }
         ],
         "lol": [
             {
-                "name": "kekw",
+                "name": "lolololololololol",
                 "songs": [],
-                "public": false,
-                "receivedFrom": "test",
-                "receivedAt": "2026-02-12T15:16:53.621Z"
+                "status": "private"
             },
             {
                 "name": "playlist1",
                 "songs": [],
-                "public": false,
-                "receivedFrom": "test",
-                "receivedAt": "2026-02-12T15:18:14.568Z"
+                "status": "private"
             },
             {
                 "name": "hohoho",
                 "songs": [],
-                "public": false
+                "status": "private"
+            },
+            {
+                "name": "neu",
+                "songs": [],
+                "status": "private"
             }
         ],
-        "server1": [],
-        "ssssssssss": []
+        "server1": [
+            {
+                "name": "kekw",
+                "songs": [
+                    "hilfe"
+                ],
+                "status": "public"
+            },
+            {
+                "name": "index",
+                "songs": [],
+                "status": "public"
+            }
+        ],
+        "ssssssssss": [],
+        "neu": [
+            {
+                "name": "neu",
+                "songs": [
+                    "3738916412"
+                ],
+                "status": "public"
+            }
+        ]
     }
 }

@@ -1,111 +1,92 @@
-import { renamePlaylist, addSong, removeSongByIndex, getPlaylists } from "../Backend/playlist.ts";
+import { ask, askChoice, askConfirm } from "../../services/prompt.ts";
+import {
+  renamePlaylist,
+  addSong,
+  removeSongByIndex,
+  getPlaylists,
+  setPlaylistStatus,
+  togglePlaylistStatus,
+  getPlaylistStatus
+} from "../Backend/playlist.ts";
 import { activeUser } from "./authenticate.ts";
-import { question, questionInt } from "readline-sync";
 import { drawPlaylist } from "./drawPlaylist.ts";
-import { formatPlaylists } from "../Backend/format.ts";
-import { type Playlist } from "../../models/personalModels.ts";
+import {
+  getTrackNameFromID,
+  getTrackArtistFromID
+} from "../../services/service.ts";
 
 export async function editPlaylist(name: string): Promise<void> {
-    console.clear();
-    console.log("\n                     |========= Willkommen bei mAI music =========|");
-    console.log(`\n------------------------\n${activeUser}'s Playlists\nPlaylist "${name}" bearbeiten\n------------------------`);
+  console.clear();
+  console.log(`\nPlaylist "${name}" bearbeiten\n`);
 
-    // Wenn Name leer -> nachfragen
-    if (name === "") {
-        console.log(formatPlaylists(await getPlaylists(activeUser)));
+  const action = await askChoice("Option wählen:", [
+    { name: "Playlist umbenennen", value: "rename" },
+    { name: "Status ändern", value: "status" },
+    { name: "Song hinzufügen", value: "add" },
+    { name: "Song entfernen", value: "remove" },
+    { name: "Zurück", value: "back" }
+  ]);
 
-        name = question("~ Welche Playlist willst du bearbeiten?\n> ");
-        if (name === "") {
-            console.log("# Gib einen gültigen Namen ein!");
-            return editPlaylist(name);
-        }
+  if (action === "rename") {
+    const newName = await ask("Neuer Name:");
+    await renamePlaylist(activeUser, name, newName);
+    return editPlaylist(newName);
+  }
+
+  if (action === "status") {
+    const statusChoice = await askChoice("Status ändern:", [
+      { name: "Public", value: "public" },
+      { name: "Private", value: "private" },
+      { name: "Toggle", value: "toggle" },
+      { name: "Abbrechen", value: "cancel" }
+    ]);
+
+    if (statusChoice === "public")
+      await setPlaylistStatus(activeUser, name, "public");
+    else if (statusChoice === "private")
+      await setPlaylistStatus(activeUser, name, "private");
+    else if (statusChoice === "toggle")
+      await togglePlaylistStatus(activeUser, name);
+
+    return editPlaylist(name);
+  }
+
+  if (action === "add") {
+    const id = await ask("Song-ID eingeben:");
+    await addSong(activeUser, name, id);
+    return editPlaylist(name);
+  }
+
+  if (action === "remove") {
+    const playlists = await getPlaylists(activeUser);
+    const playlist = playlists.find(p => p.name === name);
+
+    if (!playlist || playlist.songs.length === 0) {
+      console.log("Keine Songs in dieser Playlist.");
+      return editPlaylist(name);
     }
 
-    const menu: number = questionInt(
-        ">>> Playlist umbenennen (1)\n" +
-        ">>> Playlist öffentlich/privat stellen (2)\n" +
-        ">>> Song hinzufügen (3)\n" +
-        ">>> Song entfernen (4)\n" +
-        ">>> Zurück (5)\n\n> "
+    const songs = await Promise.all(
+      playlist.songs.map(async id => {
+        const title = await getTrackNameFromID(id);
+        const artist = await getTrackArtistFromID(id);
+        return {
+          id,
+          label: `${title} — ${artist}`
+        };
+      })
     );
 
-    switch (menu) {
-        case 1: {
-            // Playlist umbenennen
-            const oldName = name;
-            const newName = question(`Alter Name: ${oldName}\nNeuen Namen eingeben:\n> `);
+    const selected = await askChoice("Song auswählen:", songs.map(s => ({
+      name: s.label,
+      value: s.id
+    })));
 
-            if (newName === "") {
-                console.log("# Gib einen gültigen Namen ein!");
-                return editPlaylist(name);
-            }
+    const idx = playlist.songs.indexOf(selected);
+    if (idx >= 0) await removeSongByIndex(activeUser, name, idx);
 
-            await renamePlaylist(activeUser, oldName, newName);
-            name = newName;
-            return editPlaylist(name);
-        }
+    return editPlaylist(name);
+  }
 
-        case 2: {
-            //Öffentlichkeitsstatus ändern
-
-            //console.log(`Aktueller Status:\n ${statusfunktion}`)
-            //hilfsfunktion für aktuellen status: server->hier
-            //hilfsfunktion für status ändern: hier->backend->server
-        }
-
-        case 3: {
-            // Song hinzufügen
-            const songName = question("Songname:\n> ");
-            if (!songName.trim()) {
-                console.log("# Ungültiger Name!");
-                return editPlaylist(name);
-            }
-
-            const year = questionInt("Jahr:\n> ");
-            const duration = questionInt("Dauer (Sekunden):\n> ");
-
-            await addSong(activeUser, name, {
-                name: songName,
-                year,
-                duration
-            });
-
-            console.log(`\n✔ Song "${songName}" hinzugefügt!`);
-            return editPlaylist(name);
-        }
-
-        case 4: {
-            // Song löschen
-            const playlists: Playlist[] = await getPlaylists(activeUser);
-            const playlist = playlists.find((p: Playlist) => p.name === name);
-
-            if (!playlist) {
-                console.log("# Playlist nicht gefunden!");
-                return drawPlaylist(activeUser);
-            }
-
-            console.log("\nSongs:");
-            playlist.songs.forEach((s: any, i: number) => {
-                console.log(`${i}: ${s.name} (${s.year}) - ${s.duration}s`);
-            });
-
-            const idx = questionInt("\nWelchen Song löschen? (Index)\n> ");
-            if (idx < 0 || idx >= playlist.songs.length) {
-                console.log("# Ungültiger Index!");
-                return editPlaylist(name);
-            }
-
-            await removeSongByIndex(activeUser, name, idx);
-
-            console.log(`\n✔ Song entfernt!`);
-            return editPlaylist(name);
-        }
-
-        case 5:
-            return drawPlaylist(activeUser);
-
-        default:
-            console.log("nöööö");
-            return editPlaylist(name);
-    }
+  return drawPlaylist(activeUser);
 }

@@ -1,28 +1,26 @@
-// Client/Frontend/connect.ts
-import { question, questionInt } from "readline-sync";
+import { ask, askConfirm } from "../../services/prompt.ts";
 import { connectToServer } from "../Backend/connection.ts";
 import { authenticate } from "./authenticate.ts";
 
 export async function askConnection() {
-    console.clear();
-    console.log("\n                     |========= Willkommen bei mAI music =========|");
+  console.clear();
+  console.log("\nWillkommen bei mAI music");
 
-    const ip = question("Gib die IP des Servers ein:\n> ");
-    const port = questionInt("\nGib den Port des Servers ein:\n> ");
+  const ip = await ask("Server-IP:");
+  const portStr = await ask("Port:");
+  const port = Number(portStr);
 
-    console.log("\n🔌 Verbinde...");
+  console.log("\n🔌 Verbinde…");
 
-    const result = await connectToServer(ip, port);
+  const result = await connectToServer(ip, port);
 
-    if (!result.ok) {
-        console.log(`\n❌ Verbindung fehlgeschlagen: ${result.error}\n`);
-        const retry = question("Erneut versuchen? (j/n): ");
-        if (retry.toLowerCase() === "j") return askConnection();
-        return;
-    }
+  if (!result.ok) {
+    console.log(`\n❌ Verbindung fehlgeschlagen: ${result.error}`);
+    const retry = await askConfirm("Erneut versuchen?");
+    if (retry) return askConnection();
+    return;
+  }
 
-    console.log(`\n✅ Erfolgreich verbunden mit: ${result.url}\n`);
-
-    // Weiter zur Anmeldung
-    await authenticate();
+  console.log(`\n✅ Erfolgreich verbunden mit ${result.url}`);
+  await authenticate();
 }

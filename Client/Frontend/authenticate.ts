@@ -1,84 +1,65 @@
-import { questionInt, question } from "readline-sync";
+import { ask, askPassword, askChoice } from "../../services/prompt.ts";
 import { createUser, validateUser } from "../Backend/authentication.ts";
 import { initUser } from "../Backend/playlist.ts";
 import { drawMenu } from "./menu.ts";
 
-// Frontend-State: aktiver Benutzer
-export let activeUser: string = "";
+export let activeUser = "";
 
 async function signUpUser(): Promise<void> {
-    console.log("\n------------------------\nKonto erstellen\n------------------------");
-    
-    const name: string = question("Benutzername: ");
-    const password: string = question("Passwort: ", { hideEchoBack: true });
-    const temp: string = question("Passwort erneut: ", { hideEchoBack: true });
+  console.clear();
+  console.log("\n------------------------\nKonto erstellen\n------------------------");
 
-    if (password !== temp) {
-        console.log("\n# Passwörter stimmen nicht überein. Bitte versuche es erneut.");
-        return signUpUser();
-    }
+  const name = await ask("Benutzername:");
+  const pw = await askPassword("Passwort:");
+  const pw2 = await askPassword("Passwort erneut:");
 
-    const result = await createUser(name, password);
-    if (!result.ok) {
-        console.log(`\n# ${result.error}`);
-        return signUpUser();
-    }
+  if (pw !== pw2) {
+    console.log("\n# Passwörter stimmen nicht überein.");
+    return signUpUser();
+  }
 
-    // User speichern
-    activeUser = result.username;
+  const result = await createUser(name, pw);
+  if (!result.ok) {
+    console.log(`# ${result.error}`);
+    return signUpUser();
+  }
 
-    // Playlist-System initialisieren
-    await initUser(activeUser);
+  activeUser = result.username;
+  await initUser(activeUser);
 
-    console.log(`\n✔ Benutzer "${activeUser}" erfolgreich erstellt!`);
+  console.log(`\n✔ Benutzer "${activeUser}" erfolgreich erstellt!`);
 }
 
 async function loginUser(): Promise<void> {
-    console.log("\n------------------------\nEinloggen\n------------------------");
+  console.clear();
+  console.log("\n------------------------\nEinloggen\n------------------------");
 
-    const name: string = question("Benutzername: ");
-    const password: string = question("Passwort: ", { hideEchoBack: true });
+  const name = await ask("Benutzername:");
+  const pw = await askPassword("Passwort:");
 
-    const result = await validateUser(name, password);
-    if (!result.ok) {
-        console.log(`\n# ${result.error}`);
-        return loginUser();
-    }
+  const result = await validateUser(name, pw);
+  if (!result.ok) {
+    console.log(`# ${result.error}`);
+    return loginUser();
+  }
 
-    // User speichern
-    activeUser = result.username;
+  activeUser = result.username;
+  await initUser(activeUser);
 
-    // Playlist-System initialisieren (idempotent)
-    await initUser(activeUser);
-
-    console.log(`\n✔ Willkommen zurück, ${activeUser}!`);
+  console.log(`\n✔ Willkommen zurück, ${activeUser}!`);
 }
 
 export async function authenticate(): Promise<void> {
-    console.clear();
-    console.log("\n                     |========= Willkommen bei mAI music =========|");
+  console.clear();
+  console.log("\nWillkommen bei mAI music");
 
-    const login: number = questionInt(
-        "\n>>> Bitte erstelle ein Konto! (1)\n>>> Du besitzt schon ein Konto? Logge dich ein! (2)\n\n> "
-    );
+  const action = await askChoice("Bitte auswählen:", [
+    { name: "Konto erstellen", value: "signup" },
+    { name: "Einloggen", value: "login" }
+  ]);
 
-    switch (login) {
-        case 1:
-            console.clear();
-            await signUpUser();
-            break;
+  if (action === "signup") await signUpUser();
+  else await loginUser();
 
-        case 2:
-            console.clear();
-            await loginUser();
-            break;
-
-        default:
-            return;
-    }
-
-    // Wenn erfolgreich eingeloggt → weiter ins Menü
-    if (activeUser) {
-        drawMenu(activeUser, false);
-    }
+  if (activeUser) drawMenu(activeUser, false);
 }

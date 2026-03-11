@@ -1,48 +1,107 @@
-import { question, questionInt } from "readline-sync";
+import { askChoice, ask, askConfirm, waitEnter } from "../../services/prompt.ts";
 import { drawMenu } from "./menu.ts";
 import { getPlaylists } from "../Backend/playlist.ts";
-import { formatPlaylists } from "../Backend/format.ts";
-import { sendPlaylist } from "../Backend/onlineServices.ts";
+import {
+  listPublicPlaylists,
+  getPublicPlaylistDetail,
+  getSongInfoPublic,
+  sendPlaylist
+} from "../Backend/onlineServices.ts";
+import { sleep } from "./menu.ts";
 
-export async function drawOnline(activeUser : string){
+export async function drawOnline(activeUser: string) {
+  console.clear();
+  console.log(`\n${activeUser}'s Online Hub\n`);
+
+  const action = await askChoice("Option wählen:", [
+    { name: "Playlist verschicken", value: "send" },
+    { name: "Öffentliche Playlists suchen", value: "search" },
+    { name: "Zurück", value: "back" }
+  ]);
+
+  if (action === "send") {
+    const lists = await getPlaylists(activeUser);
+    if (lists.length === 0) {
+      console.log("Keine Playlists vorhanden.");
+      await waitEnter();
+      return drawOnline(activeUser);
+    }
+
+    const selected = await askChoice("Welche Playlist verschicken?", lists.map(pl => ({
+      name: `${pl.name} (${pl.songs.length} Songs)`,
+      value: pl.name
+    })));
+
+    const goalUser = await ask("An welchen Benutzer senden?");
+    const result = await sendPlaylist(activeUser, goalUser, selected);
+
+    if (!result.ok) console.log(`# Fehler: ${result.error}`);
+    else console.log(`✔ ${result.message}`);
+
+    await sleep(1000);
+    return drawOnline(activeUser);
+  }
+
+  if (action === "search") {
+    const r = await listPublicPlaylists();
+    if (!r.ok) {
+      console.log(`# Fehler: ${r.error}`);
+      await waitEnter();
+      return drawOnline(activeUser);
+    }
+
+    const items = r.items;
+    if (items.length === 0) {
+      console.log("Keine öffentlichen Playlists gefunden.");
+      await waitEnter();
+      return drawOnline(activeUser);
+    }
+
+    const chosen = await askChoice("Playlist auswählen:", items.map(pl => ({
+      name: `${pl.name} — by ${pl.username} — ${pl.songs.length} Songs`,
+      value: { user: pl.username, name: pl.name }
+    })));
+
+    const d = await getPublicPlaylistDetail(chosen.user, chosen.name);
+
+    if (!d.ok) {
+      console.log(`# Fehler: ${d.error}`);
+      await waitEnter();
+      return drawOnline(activeUser);
+    }
+
+    const detail = d.detail;
     console.clear();
-    console.log("\n                     |========= Willkommen bei mAI music =========|");
-    console.log(`\n------------------------\n${activeUser}'s Online Hub\n------------------------`);
+    console.log(`\n${detail.playlist.name}\n`);
 
-    //benachrichtugung für erhaltene playlist
+    const songs = detail.playlist.songs;
 
-    let menu : number = questionInt(">>> Playlists verschicken (1)\n>>> Playlists suchen (2)\n>>> Benachrichtigungen (3)\n>>> Zurück (4)\n\n> ")
-    
-        switch(menu){
-            case 1:
-                const playlists = await getPlaylists(activeUser);
-                console.log(formatPlaylists(playlists));
+    if (songs.length === 0) {
+      const save = await askConfirm("Leere Playlist speichern?");
+      if (save) await sendPlaylist(chosen.user, activeUser, detail.playlist.name);
+      return drawOnline(activeUser);
+    }
 
-                let name = question("~ Welche Playlist willst du verschicken?\n> ");
-                if (name === "") {
-                    console.log("# Gib einen gültigen Namen ein!");
-                    return drawOnline(activeUser);
-                }
+    const viewSong = await askChoice("Song-Detail ansehen:", [
+      { name: "Überspringen", value: null },
+      ...songs.map(id => ({
+        name: String(id),
+        value: id
+      }))
+    ]);
 
-                let goalUser = question("\n~ An wen willst du die Playlist schicken?\n> ")
+    if (viewSong) {
+      const info = await getSongInfoPublic(viewSong);
+      if (info.ok) console.log(info.song);
+      else console.log(`# ${info.error}`);
+      await waitEnter();
+    }
 
-                const result = await sendPlaylist(activeUser, goalUser, name);
+    const save = await askConfirm("Diese Playlist speichern?");
+    if (save) await sendPlaylist(chosen.user, activeUser, detail.playlist.name);
 
-                if (!result.ok) {
-                    console.log("# Fehler:", result.error);
-                } else {
-                    console.log("✔ " + result.message);
-                }
-                break
-            case 2:
-                //falls online/private playlists noch möglich sind
-                break
-            case 3:
-                drawOnline(activeUser)
-                break
-            case 4:
-                return drawMenu(activeUser, true)
-            default:
-                console.log("nöööö")
-        }
+    return drawOnline(activeUser);
+  }
+
+  return drawMenu(activeUser, true);
 }

@@ -48,6 +48,7 @@ async function buildSongFromTitle(
 
   const builtAlbum = buildAlbumFromAlbum(album);
   return {
+    id: String(track?.id ?? tracks.data[0]?.id ?? ""),
     name: track?.title || track?.title_short || track?.name || title,
     artist: buildArtistFromTrack(track),
     genre: [] as Genre[],
