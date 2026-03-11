@@ -2,6 +2,7 @@ import { Router, type Request, type Response } from "express";
 import { loadPlaylists, savePlaylists } from "../Data/data.ts";
 import { deezer, findPlaylist, resolveEffectiveUsername, safeSongs, createId } from "../serverContext.ts";
 import { searchDeezer } from "../services/deezerSearch.ts";
+import { createAIPlaylist } from "../../services/service.ts";
 
 const playlistsRouter = Router();
 
@@ -319,6 +320,38 @@ playlistsRouter.get("/playlist/public/:username/:name", (req: Request, res: Resp
   }
 
   return res.json({ username, playlist });
+});
+
+playlistsRouter.post("/playlist/create-ai", async (req: Request, res: Response) => {
+  try {
+    const { username, playlistName, mood } = req.body;
+
+    if (!username || !playlistName || !mood) {
+      return res.status(400).json({ error: "username, playlistName oder mood fehlt" });
+    }
+
+    const success = await createAIPlaylist(username, playlistName, mood);
+
+    if (success) {
+      // Lade die neu erstellte Playlist
+      const { playlist } = findPlaylist(username, playlistName);
+      return res.status(201).json({
+        ok: true,
+        message: `Playlist "${playlistName}" wurde erfolgreich mit KI erstellt!`,
+        playlist
+      });
+    } else {
+      return res.status(400).json({
+        ok: false,
+        error: "Playlist konnte nicht erstellt werden. Siehe Console für Details."
+      });
+    }
+  } catch (error: any) {
+    return res.status(500).json({
+      error: "AI Playlist erstellen fehlgeschlagen",
+      detail: error?.message ?? "Unbekannter Fehler"
+    });
+  }
 });
 
 export { playlistsRouter };

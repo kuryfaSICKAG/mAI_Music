@@ -3,3 +3,4 @@ package-lock.json
 Server/Data/playlist_data.json
 Server/Data/user_Data.json
 to-do.txt
+.env
