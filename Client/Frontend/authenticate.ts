@@ -2,12 +2,13 @@ import { ask, askPassword, askChoice } from "../../services/prompt.ts";
 import { createUser, validateUser } from "../Backend/authentication.ts";
 import { initUser } from "../Backend/playlist.ts";
 import { drawMenu } from "./menu.ts";
+import { header } from "../../services/header.ts";
 
 export let activeUser = "";
 
 async function signUpUser(): Promise<void> {
   console.clear();
-  console.log("\n------------------------\nKonto erstellen\n------------------------");
+  header("Konto erstellen")
 
   const name = await ask("Benutzername:");
   const pw = await askPassword("Passwort:");
@@ -32,7 +33,7 @@ async function signUpUser(): Promise<void> {
 
 async function loginUser(): Promise<void> {
   console.clear();
-  console.log("\n------------------------\nEinloggen\n------------------------");
+  header("Einloggen")
 
   const name = await ask("Benutzername:");
   const pw = await askPassword("Passwort:");
@@ -51,15 +52,18 @@ async function loginUser(): Promise<void> {
 
 export async function authenticate(): Promise<void> {
   console.clear();
-  console.log("\nWillkommen bei mAI music");
+  header("Willkommen bei mAI music")
+  console.log("(Bitte melden Sie sich an)\n")
 
   const action = await askChoice("Bitte auswählen:", [
     { name: "Konto erstellen", value: "signup" },
-    { name: "Einloggen", value: "login" }
+    { name: "Einloggen", value: "login" },
+    { name: "Beenden", value: "exit"}
   ]);
 
   if (action === "signup") await signUpUser();
-  else await loginUser();
+  else if(action === "login") await loginUser();
+  else return
 
   if (activeUser) drawMenu(activeUser, false);
 }

@@ -14,10 +14,12 @@ import {
   getTrackNameFromID,
   getTrackArtistFromID
 } from "../../services/service.ts";
+import { header } from "../../services/header.ts";
+import chalk from "chalk";
 
 export async function editPlaylist(name: string): Promise<void> {
   console.clear();
-  console.log(`\nPlaylist "${name}" bearbeiten\n`);
+  header(`Playlist "${name}" bearbeiten`)
 
   const action = await askChoice("Option wählen:", [
     { name: "Playlist umbenennen", value: "rename" },
@@ -32,13 +34,22 @@ export async function editPlaylist(name: string): Promise<void> {
     await renamePlaylist(activeUser, name, newName);
     return editPlaylist(newName);
   }
-
+  
   if (action === "status") {
-    const statusChoice = await askChoice("Status ändern:", [
-      { name: "Public", value: "public" },
-      { name: "Private", value: "private" },
-      { name: "Toggle", value: "toggle" },
-      { name: "Abbrechen", value: "cancel" }
+    const current = await getPlaylistStatus(activeUser, name);
+
+    const statusLabel =
+      current === "public"
+        ? chalk.green("🔓 Aktuell: Public")
+        : chalk.yellow("🔒 Aktuell: Private");
+
+    console.log("\n" + statusLabel + "\n");
+
+    const statusChoice = await askChoice("Neuen Status wählen:", [
+      { name: "🔓 Public setzen", value: "public" },
+      { name: "🔒 Private setzen", value: "private" },
+      { name: "🔁 Umschalten (toggle)", value: "toggle" },
+      { name: "❌ Abbrechen", value: "cancel" }
     ]);
 
     if (statusChoice === "public")

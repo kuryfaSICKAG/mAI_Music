@@ -3,6 +3,7 @@ import { authenticate } from "./authenticate.ts";
 import { drawPlaylist } from "./drawPlaylist.ts";
 import { drawSong } from "./song.ts";
 import { drawOnline } from "./online.ts";
+import { header } from "../../services/header.ts";
 
 export function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -15,8 +16,9 @@ export async function drawMenu(activeUser: string, loggedIn: boolean): Promise<v
   }
 
   console.clear();
+  header("Hauptmenü")
 
-  const choice = await askChoice("Hauptmenü:", [
+  const choice = await askChoice("Was möchtest du tun?:", [
     { name: "Playlists verwalten", value: "playlist" },
     { name: "Songs suchen", value: "songs" },
     { name: "Online-Funktionen", value: "online" },
