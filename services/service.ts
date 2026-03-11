@@ -310,7 +310,7 @@ export async function createAIPlaylist(username: string, playlistName: string, m
         
         // Step 4: Frage ob Playlist erstellt werden soll
         console.log(`\n`);
-        const confirm = question(`Soll die Playlist "${playlistName}" zum Account "${username}" hinzugefügt werden? (y/n): `);
+        const confirm = await ask(`Soll die Playlist "${playlistName}" zum Account "${username}" hinzugefügt werden? (y/n): `);
         
         if (confirm.toLowerCase() !== 'y') {
             console.log("Playlist wurde nicht erstellt.");
