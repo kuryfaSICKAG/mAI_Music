@@ -315,7 +315,7 @@ export async function createAIPlaylist(username: string, playlistName: string, m
                     if (seenSongIds.has(normalizedTrackId)) {
                         continue;
                     }
-                    const title = await getTrackFromID(String(firstTrackId));
+                    const title = await getTrackNameFromID(String(firstTrackId));
                     const api = new DeezerAPI();
                     const trackData = await api.lookupTrack(String(firstTrackId));
                     const artist = trackData?.artist?.name || "Unknown Artist";
