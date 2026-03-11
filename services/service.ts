@@ -180,14 +180,12 @@ export async function addToPlaylist(songID: string, playlistName: string, userNa
         //check ob user existiert
         const userPlaylists = data.playlistsByUser?.[userName];
         if (!Array.isArray(userPlaylists)) {
-            console.error(`addToPlaylist error: User \"${userName}\" not found.`);
             return "error";
         }
         //check ob playlist existiert(nicht case sensitive)
         const targetPlaylistName = playlistName.trim().toLowerCase();
         const playlist = userPlaylists.find((p: any) => String(p?.name ?? "").trim().toLowerCase() === targetPlaylistName);
         if (!playlist) {
-            console.error(`addToPlaylist error: Playlist \"${playlistName}\" for user \"${userName}\" not found.`);
             return "error";
         }
         //check ob song schon in der Playlist vorhanden ist
@@ -195,17 +193,14 @@ export async function addToPlaylist(songID: string, playlistName: string, userNa
         const normalizedSongId = String(songID);
         const alreadyExists = playlist.songs.some((existingId: any) => String(existingId) === normalizedSongId);
         if (alreadyExists) {
-            console.log(`addToPlaylist: Song ${normalizedSongId} ist bereits in \"${playlist.name}\" für User \"${userName}\".`);
             return "exists";
         }
         //song hinzufügen
         playlist.songs.push(normalizedSongId);
 
         await fs.writeFile(filePath, JSON.stringify(data, null, 2), "utf8");
-        console.log(`addToPlaylist: Song ${normalizedSongId} in \"${playlist.name}\" für User \"${userName}\" gespeichert (${filePath}).`);
         return "added";
     } catch (err: any) {
-        console.error("addToPlaylist error:", err?.message || err);
         return "error";
     }
 }
