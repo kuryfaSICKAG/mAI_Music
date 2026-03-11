@@ -14,7 +14,8 @@
             {
                 "name": "kekw",
                 "songs": [
-                    "hilfe"
+                    "hilfe",
+                    "3738916412"
                 ],
                 "status": "public"
             },
@@ -53,7 +54,29 @@
                 "status": "private"
             }
         ],
-        "server1": [],
-        "ssssssssss": []
+        "server1": [
+            {
+                "name": "kekw",
+                "songs": [
+                    "hilfe"
+                ],
+                "status": "public"
+            },
+            {
+                "name": "index",
+                "songs": [],
+                "status": "public"
+            }
+        ],
+        "ssssssssss": [],
+        "neu": [
+            {
+                "name": "neu",
+                "songs": [
+                    "3738916412"
+                ],
+                "status": "public"
+            }
+        ]
     }
 }

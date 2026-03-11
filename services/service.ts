@@ -1,5 +1,5 @@
 import { DeezerAPI } from "../apiServices/deezerAPI/deezer.ts";
-import { questionInt, question } from "readline-sync";
+import { ask, askInt } from "./prompt.ts";
 import { promises as fs } from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -185,11 +185,11 @@ export async function addToPlaylist(songID: string, playlistName: string, userNa
 }
 
 
-await searchSong("I could be yoshi");
-const j = question("\n>>> Möchtest du einen Song Hinzufügen? (y/n)");
+/*await searchSong("I could be yoshi");
+const j = await ask("\n>>> Möchtest du einen Song Hinzufügen? (y/n)");
 switch(j){
     case "y": {
-        const k = questionInt("\n>>> Bitte gib die Nummer des Songs ein, den du hinzufügen möchtest: ");
+        const k = await askInt("\n>>> Bitte gib die Nummer des Songs ein, den du hinzufügen möchtest: ");
         if(k<=0) break;
         const song = searchedSongs[k-1];
         if (song == null) {
@@ -216,7 +216,7 @@ switch(j){
     default:
         console.log("Ungültige Eingabe. Bitte versuche es erneut.");
     
-}
+}*/
 
 
 // export function newPlaylist(name: string){

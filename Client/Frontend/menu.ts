@@ -1,42 +1,31 @@
-import { questionInt } from "readline-sync";
+import { askChoice } from "../../services/prompt.ts";
 import { authenticate } from "./authenticate.ts";
 import { drawPlaylist } from "./drawPlaylist.ts";
-import { drawOnline } from "./online.ts";
 import { drawSong } from "./song.ts";
+import { drawOnline } from "./online.ts";
 
- export function sleep(ms: number) {
+export function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export async function drawMenu(activeUser: string, loggedIn : boolean) {
-    if(!loggedIn){
-        console.log(`Du wirst eingeloggt als "${activeUser}"`)
-        for (let i = 0; i < 5; i++) {
-            process.stdout.write(".\n")
-            await sleep(500)
-        }
-        await sleep(200)
-    }
-    
-    console.clear()
-    console.log("\n                     |========= Willkommen bei mAI music =========|")
-    console.log(`\n------------------------\n${activeUser}'s Homepage\n------------------------`)
+export async function drawMenu(activeUser: string, loggedIn: boolean): Promise<void> {
+  if (!loggedIn) {
+    console.log(`Du wirst eingeloggt als "${activeUser}"`);
+    await sleep(1500);
+  }
 
-    let menu : number = questionInt(">>> Playlists verwalten (1)\n>>> Songs suchen (2)\n>>> Online-Funktionen (3)\n>>> Abmelden (0)\n\n> ")
+  console.clear();
 
-    switch(menu){
-        case 1:
-            drawPlaylist(activeUser)
-            break
-        case 2:
-            drawSong(activeUser)
-            break
-        case 3:
-            drawOnline(activeUser)
-            break
-        case 0:
-            return authenticate()
-        default:
-            console.log("nöööö")
-    }
+  const choice = await askChoice("Hauptmenü:", [
+    { name: "Playlists verwalten", value: "playlist" },
+    { name: "Songs suchen", value: "songs" },
+    { name: "Online-Funktionen", value: "online" },
+    { name: "Abmelden", value: "logout" }
+  ]);
+
+  if (choice === "playlist") return drawPlaylist(activeUser);
+  if (choice === "songs") return drawSong(activeUser);
+  if (choice === "online") return drawOnline(activeUser);
+
+  return authenticate();
 }

@@ -35,6 +35,7 @@
   "dependencies": {
     "express": "^5.2.1",
     "fs": "^0.0.1-security",
+    "inquirer": "^13.3.0",
     "path": "^0.12.7",
     "prompt-sync": "^4.2.0"
   }
