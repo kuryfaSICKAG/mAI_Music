@@ -3,6 +3,10 @@ import { ask, askInt } from "./prompt.ts";
 import { promises as fs } from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { OpenAI } from "openai";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 // store ids (string or number) to avoid type mismatches
 export const searchedSongs: Array<string | number> = [];
@@ -59,6 +63,28 @@ export async function searchSong(track: string): Promise<Array<string | number>>
         return [];
     }
 }
+
+export async function searchSongInv(track: string): Promise<Array<string | number>> {
+    const api = new DeezerAPI();
+    try {
+        const tracks = await api.searchTrack(track);
+        if (tracks.data && tracks.data.length > 0) {
+            clearSearchedSongs();
+            tracks.data.slice(0, 25).forEach((t: any) => {
+                if (t.id) {
+                    searchedSongs.push(t.id);
+                }
+            });
+            return searchedSongs;
+        } else {
+            return [];
+        }
+    } catch (err: any) {
+        console.error("searchSongInv error:", err?.message || err);
+        return [];
+    }
+}
+
 
 export async function outputTrackFromID(songID:string){
     const api = new DeezerAPI();
@@ -184,6 +210,156 @@ export async function addToPlaylist(songID: string, playlistName: string, userNa
     }
 }
 
+// export function newPlaylist(name: string){
+    
+// }
+
+export async function createAIPlaylist(username: string, playlistName: string, mood: string): Promise<boolean> {
+    const apiKey = process.env.OPENAI_API_KEY;
+    
+    if (!apiKey) {
+        console.error("Fehler: OPENAI_API_KEY ist nicht in der .env Datei gesetzt.");
+        return false;
+    }
+    
+    const client = new OpenAI({ apiKey });
+    
+    try {
+        // Step 1: AI generiert Songnamen basierend auf mood
+        console.log(`\n🎵 Generiere Playlist "${playlistName}" mit Stimmung: "${mood}"...`);
+        
+        const completion = await client.chat.completions.create({
+            model: "gpt-4o-mini",
+            temperature: 0.8,
+            max_tokens: 700,
+            messages: [
+                {
+                    role: "system",
+                    content: "Du bist ein Musik-Assistant. Gib nur eine nummerierte Songliste zurueck, eine Zeile pro Song, im Format: Songtitel - Kuenstler.",
+                },
+                {
+                    role: "user",
+                    content: `Generiere 10-15 aktuelle und beliebte Lieder fuer folgende Stimmung/Genre: "${mood}". Gib ausschliesslich eine nummerierte Liste aus.`,
+                },
+            ],
+        });
+
+        const responseText = completion.choices?.[0]?.message?.content ?? "";
+        
+        // Parse die Songliste
+        const songLines = responseText.split('\n').filter(line => line.trim());
+        const songSuggestions: string[] = [];
+        
+        songLines.forEach(line => {
+            const cleaned = line.replace(/^\d+\.\s*/, '').trim();
+            if (cleaned) songSuggestions.push(cleaned);
+        });
+
+        const uniqueSongSuggestions = Array.from(new Set(songSuggestions));
+        
+        if (uniqueSongSuggestions.length === 0) {
+            console.error("❌ Keine Songs von der KI generiert.");
+            return false;
+        }
+        
+        // Step 2: Suche die Songs in Deezer
+        console.log(`\n🔍 Suche ${uniqueSongSuggestions.length} Songs in Deezer...`);
+        
+        const foundSongs: Array<{ id: string | number; title: string; artist: string }> = [];
+        const seenSongIds = new Set<string>();
+        
+        for (const suggestion of uniqueSongSuggestions) {
+            try {
+                const tracks = await searchSongInv(suggestion);
+                if (tracks.length > 0) {
+                    const firstTrackId = tracks[0];
+                    if (firstTrackId == null) {
+                        continue;
+                    }
+                    const normalizedTrackId = String(firstTrackId);
+                    if (seenSongIds.has(normalizedTrackId)) {
+                        continue;
+                    }
+                    const title = await getTrackNameFromID(String(firstTrackId));
+                    const api = new DeezerAPI();
+                    const trackData = await api.lookupTrack(String(firstTrackId));
+                    const artist = trackData?.artist?.name || "Unknown Artist";
+                    seenSongIds.add(normalizedTrackId);
+                    
+                    foundSongs.push({
+                        id: firstTrackId,
+                        title: title,
+                        artist: artist
+                    });
+                }
+            } catch (err) {
+                console.log(`  ⚠️ Konnte nicht finden: ${suggestion}`);
+            }
+        }
+        
+        if (foundSongs.length === 0) {
+            console.error("❌ Keine Songs in Deezer gefunden.");
+            return false;
+        }
+        
+        // Step 3: Zeige die Songs an
+        console.log(`\n📋 Playlist "${playlistName}" würde folgende ${foundSongs.length} Songs enthalten:\n`);
+        foundSongs.forEach((song, idx) => {
+            console.log(`${idx + 1}. ${song.title} - ${song.artist}`);
+        });
+        
+        // Step 4: Frage ob Playlist erstellt werden soll
+        console.log(`\n`);
+        const confirm = question(`Soll die Playlist "${playlistName}" zum Account "${username}" hinzugefügt werden? (y/n): `);
+        
+        if (confirm.toLowerCase() !== 'y') {
+            console.log("Playlist wurde nicht erstellt.");
+            return false;
+        }
+        
+        // Step 5: Erstelle Playlist und füge Songs hinzu
+        console.log(`\n💾 Erstelle Playlist und füge Songs hinzu...`);
+        
+        const currentFile = fileURLToPath(import.meta.url);
+        const currentDir = path.dirname(currentFile);
+        const filePath = path.resolve(currentDir, "..", "Server", "Data", "playlist_data.json");
+        
+        // Playlist in die JSON Datei erstellen
+        const raw = await fs.readFile(filePath, "utf8");
+        const data: any = JSON.parse(raw || "{}");
+        
+        if (!data.playlistsByUser) data.playlistsByUser = {};
+        if (!data.playlistsByUser[username]) data.playlistsByUser[username] = [];
+        
+        // Check ob Playlist bereits existiert
+        const playlistExists = data.playlistsByUser[username].some((p: any) => 
+            String(p?.name ?? "").trim().toLowerCase() === playlistName.trim().toLowerCase()
+    );
+    
+    if (playlistExists) {
+        console.error(`Playlist "${playlistName}" existiert bereits für User "${username}".`);
+        return false;
+    }
+    
+    // Erstelle neue Playlist
+    const newPlaylist = {
+        name: playlistName,
+        songs: foundSongs.map(s => String(s.id)),
+        public: false
+    };
+    
+    data.playlistsByUser[username].push(newPlaylist);
+    await fs.writeFile(filePath, JSON.stringify(data, null, 2), "utf8");
+    
+    console.log(`✅ Playlist "${playlistName}" mit ${foundSongs.length} Songs erstellt und gespeichert!`);
+    return true;
+    
+    } catch (err: any) {
+        console.error("❌ Fehler in createAIPlaylist:", err?.message || err);
+        return false;
+    }
+}
+
 
 /*await searchSong("I could be yoshi");
 const j = await ask("\n>>> Möchtest du einen Song Hinzufügen? (y/n)");
@@ -216,6 +392,7 @@ switch(j){
     default:
         console.log("Ungültige Eingabe. Bitte versuche es erneut.");
     
+}
 }*/
 
 
