@@ -1,10 +1,12 @@
+import { header } from "../../services/header.ts";
 import { ask, askConfirm } from "../../services/prompt.ts";
 import { connectToServer } from "../Backend/connection.ts";
 import { authenticate } from "./authenticate.ts";
 
 export async function askConnection() {
   console.clear();
-  console.log("\nWillkommen bei mAI music");
+  header("Willkommen bei mAI music")
+  console.log("(Bitte Server auswählen)\n")
 
   const ip = await ask("Server-IP:");
   const portStr = await ask("Port:");

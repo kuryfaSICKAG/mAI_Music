@@ -8,10 +8,11 @@ import {
   sendPlaylist
 } from "../Backend/onlineServices.ts";
 import { sleep } from "./menu.ts";
+import { header } from "../../services/header.ts";
 
 export async function drawOnline(activeUser: string) {
   console.clear();
-  console.log(`\n${activeUser}'s Online Hub\n`);
+  header(`${activeUser}'s Online Hub`)
 
   const action = await askChoice("Option wählen:", [
     { name: "Playlist verschicken", value: "send" },

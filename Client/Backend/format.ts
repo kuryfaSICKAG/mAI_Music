@@ -1,21 +1,19 @@
+// Backend/format.ts
+import chalk from "chalk";
 import type { Playlist } from "../../models/personalModels.ts";
 
-/** Formatiert Playlists als lesbaren String (mit Public/Private-Status) */
+/** Formatiert Playlists als schöne Liste mit Icons & Status */
 export function formatPlaylists(playlists: Playlist[]): string {
   if (!Array.isArray(playlists) || playlists.length === 0) {
-    return "Keine Playlists gefunden.";
+    return chalk.gray("Keine Playlists gefunden.");
   }
 
-  const lines: string[] = [];
+  return playlists
+    .map((pl, idx) => {
+      const isPublic = (pl as any).status === "public";
+      const icon = isPublic ? chalk.green("🔓 Public") : chalk.yellow("🔒 Private");
 
-  playlists.forEach((pl, idx) => {
-    const statusEmoji =
-      (pl as any).status === "public" ? "🔓" :
-      (pl as any).status === "private" ? "🔒" :
-      "";
-
-    lines.push(`${idx+1}. ${pl.name} ${statusEmoji}`);
-  });
-
-  return lines.join("\n");
+      return `${chalk.cyan(idx + 1 + ".")}  ${chalk.bold(pl.name)}  ${icon}`;
+    })
+    .join("\n");
 }
