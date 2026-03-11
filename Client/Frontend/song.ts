@@ -1,9 +1,19 @@
-import { ask, askChoice, askConfirm, waitEnter } from "../../services/prompt.ts";
+import {
+  ask,
+  askChoice,
+  askConfirm,
+  waitEnter,
+} from "../../services/prompt.ts";
 import { drawMenu } from "./menu.ts";
-import { searchSong, addToPlaylist, getTrackNameFromID, getTrackArtistFromID } from "../../services/service.ts";
+import {
+  searchSong,
+  addToPlaylist,
+  getTrackNameFromID,
+  getTrackArtistFromID,
+} from "../../services/service.ts";
 import { getPlaylists } from "../Backend/playlist.ts";
 import { formatPlaylists } from "../Backend/format.ts";
-import { header } from "../../services/header.ts";
+import { header } from "../../services/ui.ts";
 
 export async function drawSong(activeUser: string): Promise<void> {
   console.clear();
@@ -11,7 +21,7 @@ export async function drawSong(activeUser: string): Promise<void> {
 
   const action = await askChoice("Aktion auswählen:", [
     { name: "🎵 Suche starten", value: "search" },
-    { name: "⬅️  Zurück", value: "back" }
+    { name: "⬅️  Zurück", value: "back" },
   ]);
 
   if (action === "back") {
@@ -37,9 +47,9 @@ export async function drawSong(activeUser: string): Promise<void> {
         const artist = await getTrackArtistFromID(id);
         return {
           name: `${i + 1}. ${title} — ${artist} (${id})`,
-          value: id
+          value: id,
         };
-      })
+      }),
     );
 
     const doAdd = await askConfirm("Möchtest du einen Song hinzufügen?");
@@ -48,8 +58,8 @@ export async function drawSong(activeUser: string): Promise<void> {
     if (!doAdd) return drawSong(activeUser);
 
     const songId = await askChoice("Song auswählen:", [
-        ...resultChoices,
-        { name: "❌ Abbrechen", value: "cancel" }
+      ...resultChoices,
+      { name: "❌ Abbrechen\n", value: "cancel" },
     ]);
 
     console.log(""); // <<< extra Leerzeile
@@ -67,10 +77,10 @@ export async function drawSong(activeUser: string): Promise<void> {
 
     const playlistName = await askChoice(
       "Zu welcher Playlist hinzufügen?",
-      playlists.map(pl => ({
+      playlists.map((pl) => ({
         name: `${pl.name} (${pl.songs.length} Songs)`,
-        value: pl.name
-      }))
+        value: pl.name,
+      })),
     );
 
     const title = await getTrackNameFromID(songId);

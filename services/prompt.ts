@@ -3,14 +3,14 @@ import inquirer from "inquirer";
 
 export async function ask(message: string): Promise<string> {
   const answer: { value: string } = await inquirer.prompt([
-    { type: "input", name: "value", message }
+    { type: "input", name: "value", message },
   ]);
   return answer.value;
 }
 
 export async function askPassword(message: string): Promise<string> {
   const answer: { value: string } = await inquirer.prompt([
-    { type: "password", name: "value", message, mask: "*" }
+    { type: "password", name: "value", message, mask: "*" },
   ]);
   return answer.value;
 }
@@ -25,18 +25,18 @@ export async function askInt(message: string): Promise<number> {
         const n = Number(input);
         return Number.isInteger(n) ? true : "Bitte eine ganze Zahl eingeben.";
       },
-      filter: (input: string) => Number(input)
-    }
+      filter: (input: string) => Number(input),
+    },
   ]);
   return answer.value;
 }
 
 export async function askConfirm(
   message: string,
-  defaultVal = true
+  defaultVal = true,
 ): Promise<boolean> {
   const answer: { value: boolean } = await inquirer.prompt([
-    { type: "confirm", name: "value", message, default: defaultVal }
+    { type: "confirm", name: "value", message, default: defaultVal },
   ]);
   return answer.value;
 }
@@ -44,24 +44,20 @@ export async function askConfirm(
 export async function askChoice<T = string>(
   message: string,
   choices: Array<T | { name: string; value: T; short?: string }>,
-  pageSize = 12
+  pageSize = 30,
 ): Promise<T> {
   const answer: { value: T } = await inquirer.prompt([
     {
-      type: "select",            // <-- statt "list"
+      type: "select", // <-- statt "list"
       name: "value",
       message,
       choices: choices as any,
-      pageSize,                  // <-- CamelCase
+      pageSize, // <-- CamelCase
     },
   ]);
   return answer.value;
 }
 
-export async function waitEnter(
-  message = "(Enter)…"
-): Promise<void> {
-  await inquirer.prompt([
-    { type: "input", name: "_", message }
-  ]);
+export async function waitEnter(message = "(Enter)…"): Promise<void> {
+  await inquirer.prompt([{ type: "input", name: "_", message }]);
 }

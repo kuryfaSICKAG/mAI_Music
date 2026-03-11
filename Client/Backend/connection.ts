@@ -22,12 +22,18 @@ export function setServerUrl(url: string) {
  * der Server die Verbindung wegen Inaktivität schließt. Ein einmaliger Retry
  * öffnet dabei eine frische Verbindung.
  */
-export async function safeFetch(url: string, options?: RequestInit): Promise<Response> {
+export async function safeFetch(
+  url: string,
+  options?: RequestInit,
+): Promise<Response> {
   try {
     const res = await fetch(url, options);
     return res;
   } catch (err: any) {
-    if (err?.cause?.code === "ECONNRESET" || err?.cause?.code === "ECONNREFUSED") {
+    if (
+      err?.cause?.code === "ECONNRESET" ||
+      err?.cause?.code === "ECONNREFUSED"
+    ) {
       // Stale pooled connection – einmal neu versuchen
       return fetch(url, options);
     }
@@ -40,9 +46,15 @@ export async function safeFetch(url: string, options?: RequestInit): Promise<Res
  */
 function isValidHost(host: string): boolean {
   // sehr einfache Plausi: hostname oder IP (IPv4/IPv6)
-  const isIPv4 = /^(25[0-5]|2[0-4]\d|[01]?\d?\d)(\.(25[0-5]|2[0-4]\d|[01]?\d?\d)){3}$/.test(host);
+  const isIPv4 =
+    /^(25[0-5]|2[0-4]\d|[01]?\d?\d)(\.(25[0-5]|2[0-4]\d|[01]?\d?\d)){3}$/.test(
+      host,
+    );
   const isIPv6 = /^[0-9a-fA-F:]+$/.test(host) && host.includes(":"); // grob
-  const isHostname = /^(?!-)[A-Za-z0-9-]{1,63}(?<!-)(\.(?!-)[A-Za-z0-9-]{1,63}(?<!-))*\.?$/.test(host);
+  const isHostname =
+    /^(?!-)[A-Za-z0-9-]{1,63}(?<!-)(\.(?!-)[A-Za-z0-9-]{1,63}(?<!-))*\.?$/.test(
+      host,
+    );
 
   return isIPv4 || isIPv6 || isHostname;
 }
@@ -54,9 +66,14 @@ function isValidPort(port: number): boolean {
 /**
  * Baut aus host/port eine gültige URL (unterstützt IPv6)
  */
-function buildBaseUrl(host: string, port: number, protocol: "http" | "https" = "http"): string {
+function buildBaseUrl(
+  host: string,
+  port: number,
+  protocol: "http" | "https" = "http",
+): string {
   // IPv6 muss in [ ] geklammert werden
-  const bracketed = host.includes(":") && !host.startsWith("[") ? `[${host}]` : host;
+  const bracketed =
+    host.includes(":") && !host.startsWith("[") ? `[${host}]` : host;
   return `${protocol}://${bracketed}:${port}`;
 }
 
@@ -99,9 +116,9 @@ export async function connectToServer(
     protocol?: "http" | "https";
     timeoutMs?: number;
     autoAuthenticate?: boolean;
-    onError?: (msg: string) => void;   // für UI-Fehlerausgabe
+    onError?: (msg: string) => void; // für UI-Fehlerausgabe
     onSuccess?: (url: string) => void; // für UI-Erfolgsmeldung
-  }
+  },
 ): Promise<{ ok: true; url: string } | { ok: false; error: string }> {
   const protocol = options?.protocol ?? "http";
   const timeoutMs = options?.timeoutMs ?? 3000;

@@ -128,9 +128,7 @@ export function loadUsers(): UsersDB {
     : [];
 
   const authSessions = Array.isArray(db?.authSessions)
-    ? db.authSessions
-        .map(normalizeSession)
-        .filter((s): s is AuthSession => !!s)
+    ? db.authSessions.map(normalizeSession).filter((s): s is AuthSession => !!s)
     : [];
 
   const normalized: UsersDB = { users, authSessions };
@@ -154,8 +152,10 @@ function normalizePlaylist(p: any): PMPlaylist {
   const songs: string[] = Array.isArray(p?.songs)
     ? p.songs
         .map((song: any) => {
-          if (typeof song === "string" || typeof song === "number") return String(song);
-          if (song && typeof song === "object" && song.id != null) return String(song.id);
+          if (typeof song === "string" || typeof song === "number")
+            return String(song);
+          if (song && typeof song === "object" && song.id != null)
+            return String(song.id);
           return "";
         })
         .filter((id: string) => id.length > 0)
@@ -165,8 +165,8 @@ function normalizePlaylist(p: any): PMPlaylist {
     p?.status === "public" || p?.status === "private"
       ? p.status
       : p?.public === true
-      ? "public"
-      : "private";
+        ? "public"
+        : "private";
 
   const normalized: PMPlaylist = { name, songs, status };
   return normalized;
@@ -178,7 +178,11 @@ export function loadPlaylists(): PlaylistsDB {
   const raw = loadJSON<any>(playlistFile);
 
   const playlistsByUser: Record<string, PMPlaylist[]> = {};
-  if (raw && typeof raw === "object" && typeof raw.playlistsByUser === "object") {
+  if (
+    raw &&
+    typeof raw === "object" &&
+    typeof raw.playlistsByUser === "object"
+  ) {
     for (const user of Object.keys(raw.playlistsByUser)) {
       const userPlaylists = Array.isArray(raw.playlistsByUser[user])
         ? (raw.playlistsByUser[user] as any[]).map(normalizePlaylist)

@@ -58,7 +58,7 @@ function clampLimit(limit: number | undefined): number {
 export async function searchDeezer(
   query: string,
   type: SearchType = "all",
-  limit?: number
+  limit?: number,
 ): Promise<SearchItem[]> {
   const q = query.trim();
   const maxItems = clampLimit(limit);

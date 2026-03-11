@@ -28,9 +28,8 @@ async function parseJsonSafe(res: Response): Promise<any | null> {
  */
 export async function createUser(
   username: string,
-  password: string
+  password: string,
 ): Promise<{ ok: true; username: string } | { ok: false; error: string }> {
-  
   const base = getServerUrl();
   if (!base) return { ok: false, error: "Keine Server-Verbindung." };
 
@@ -38,7 +37,7 @@ export async function createUser(
     const res = await fetch(`${base}/auth/create`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password })
+      body: JSON.stringify({ username, password }),
     });
 
     const data = await parseJsonSafe(res);
@@ -46,17 +45,19 @@ export async function createUser(
     if (!res.ok) {
       return {
         ok: false,
-        error: data?.error ?? `Fehler: HTTP ${res.status}`
+        error: data?.error ?? `Fehler: HTTP ${res.status}`,
       };
     }
 
     return {
       ok: true,
-      username: data?.username ?? username
+      username: data?.username ?? username,
     };
-
   } catch (e: any) {
-    return { ok: false, error: e?.message ?? "Netzwerkfehler beim Registrieren." };
+    return {
+      ok: false,
+      error: e?.message ?? "Netzwerkfehler beim Registrieren.",
+    };
   }
 }
 
@@ -70,9 +71,8 @@ export async function createUser(
  */
 export async function validateUser(
   username: string,
-  password: string
+  password: string,
 ): Promise<{ ok: true; username: string } | { ok: false; error: string }> {
-
   const base = getServerUrl();
   if (!base) return { ok: false, error: "Keine Server-Verbindung." };
 
@@ -80,7 +80,7 @@ export async function validateUser(
     const res = await fetch(`${base}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password })
+      body: JSON.stringify({ username, password }),
     });
 
     const data = await parseJsonSafe(res);
@@ -88,15 +88,14 @@ export async function validateUser(
     if (!res.ok) {
       return {
         ok: false,
-        error: data?.error ?? "Benutzername oder Passwort falsch."
+        error: data?.error ?? "Benutzername oder Passwort falsch.",
       };
     }
 
     return {
       ok: true,
-      username: data?.username ?? username
+      username: data?.username ?? username,
     };
-
   } catch (e: any) {
     return { ok: false, error: e?.message ?? "Netzwerkfehler beim Login." };
   }

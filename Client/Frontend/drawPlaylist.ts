@@ -1,13 +1,17 @@
 import { ask, askChoice, askConfirm } from "../../services/prompt.ts";
 import { drawMenu } from "./menu.ts";
-import { getPlaylists, createPlaylist, deletePlaylist } from "../Backend/playlist.ts";
+import {
+  getPlaylists,
+  createPlaylist,
+  deletePlaylist,
+} from "../Backend/playlist.ts";
 import { editPlaylist } from "./editPlaylist.ts";
 import { formatPlaylists } from "../Backend/format.ts";
-import { header } from "../../services/header.ts";
+import { header } from "../../services/ui.ts";
 
 export async function drawPlaylist(activeUser: string): Promise<void> {
   console.clear();
-  header(`${activeUser}'s Playlists`)
+  header(`${activeUser}'s Playlists`);
 
   const lists = await getPlaylists(activeUser);
   if (lists.length === 0) console.log("Keine Playlists vorhanden.");
@@ -17,7 +21,7 @@ export async function drawPlaylist(activeUser: string): Promise<void> {
     { name: "Playlist erstellen", value: "create" },
     { name: "Playlist bearbeiten", value: "edit" },
     { name: "Playlist löschen", value: "delete" },
-    { name: "Zurück", value: "back" }
+    { name: "Zurück", value: "back" },
   ]);
 
   if (choice === "create") {
@@ -33,10 +37,13 @@ export async function drawPlaylist(activeUser: string): Promise<void> {
   if (choice === "edit") {
     if (lists.length === 0) return drawPlaylist(activeUser);
 
-    const selected = await askChoice("Welche Playlist bearbeiten?", lists.map(p => ({
-      name: `${p.name} (${p.songs.length} Songs)`,
-      value: p.name
-    })));
+    const selected = await askChoice(
+      "Welche Playlist bearbeiten?",
+      lists.map((p) => ({
+        name: `${p.name} (${p.songs.length} Songs)`,
+        value: p.name,
+      })),
+    );
 
     return editPlaylist(selected);
   }
@@ -44,10 +51,13 @@ export async function drawPlaylist(activeUser: string): Promise<void> {
   if (choice === "delete") {
     if (lists.length === 0) return drawPlaylist(activeUser);
 
-    const selected = await askChoice("Welche Playlist löschen?", lists.map(p => ({
-      name: `${p.name} (${p.songs.length} Songs)`,
-      value: p.name
-    })));
+    const selected = await askChoice(
+      "Welche Playlist löschen?",
+      lists.map((p) => ({
+        name: `${p.name} (${p.songs.length} Songs)`,
+        value: p.name,
+      })),
+    );
 
     const ok = await askConfirm(`Playlist "${selected}" wirklich löschen?`);
     if (ok) await deletePlaylist(activeUser, selected);

@@ -22,7 +22,12 @@ usersRouter.post("/users", (req: Request, res: Response) => {
     return res.status(409).json({ error: "Benutzer existiert bereits!" });
   }
 
-  data.users.push({ username, password, profile: defaultProfile(), favorites: [] });
+  data.users.push({
+    username,
+    password,
+    profile: defaultProfile(),
+    favorites: [],
+  });
   saveUsers(data);
 
   return res.json({ message: "User gespeichert", data });

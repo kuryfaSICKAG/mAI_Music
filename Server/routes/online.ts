@@ -10,7 +10,9 @@ onlineRouter.post("/sendPlaylist", (req: Request, res: Response) => {
     const { fromUser, toUser, playlistName } = req.body;
 
     if (!fromUser || !toUser || !playlistName) {
-      return res.status(400).json({ error: "fromUser, toUser oder playlistName fehlt" });
+      return res
+        .status(400)
+        .json({ error: "fromUser, toUser oder playlistName fehlt" });
     }
 
     const db = loadPlaylists();
@@ -26,7 +28,7 @@ onlineRouter.post("/sendPlaylist", (req: Request, res: Response) => {
     if (toArr.some((p: any) => p.name === playlistName)) {
       return res.status(409).json({
         ok: false,
-        error: `Playlist '${playlistName}' existiert bei '${toUser}' bereits.`
+        error: `Playlist '${playlistName}' existiert bei '${toUser}' bereits.`,
       });
     }
 
@@ -37,8 +39,8 @@ onlineRouter.post("/sendPlaylist", (req: Request, res: Response) => {
       source?.status === "public" || source?.status === "private"
         ? source.status
         : (source as any)?.public === true
-        ? "public"
-        : "private";
+          ? "public"
+          : "private";
 
     // Nur gültiges Playlist-Objekt speichern (keine Zusatzfelder wie receivedFrom/receivedAt!)
     const transferred: Playlist = {
@@ -54,25 +56,31 @@ onlineRouter.post("/sendPlaylist", (req: Request, res: Response) => {
       ok: true,
       message: `Playlist '${source.name}' wurde an '${toUser}' gesendet.`,
     });
-
   } catch {
-    return res.status(500).json({ error: "Playlist konnte nicht gesendet werden" });
+    return res
+      .status(500)
+      .json({ error: "Playlist konnte nicht gesendet werden" });
   }
 });
 
-onlineRouter.get("/playlist/received/:username", (req: Request, res: Response) => {
-  try {
-    const username = req.params.username as string;
-    const db = loadPlaylists();
-    const all = db.playlistsByUser[username] ?? [];
+onlineRouter.get(
+  "/playlist/received/:username",
+  (req: Request, res: Response) => {
+    try {
+      const username = req.params.username as string;
+      const db = loadPlaylists();
+      const all = db.playlistsByUser[username] ?? [];
 
-    // Hinweis: Da in der DB keine Extra-Felder gespeichert werden,
-    // liefert diese Route aktuell einfach alle Playlists des Users.
-    // Für echten „Posteingang“ bitte separaten Store nutzen (kann ich dir bauen).
-    return res.json(all);
-  } catch {
-    return res.status(500).json({ error: "Empfangene Playlists konnten nicht geladen werden" });
-  }
-});
+      // Hinweis: Da in der DB keine Extra-Felder gespeichert werden,
+      // liefert diese Route aktuell einfach alle Playlists des Users.
+      // Für echten „Posteingang“ bitte separaten Store nutzen (kann ich dir bauen).
+      return res.json(all);
+    } catch {
+      return res
+        .status(500)
+        .json({ error: "Empfangene Playlists konnten nicht geladen werden" });
+    }
+  },
+);
 
 export { onlineRouter };

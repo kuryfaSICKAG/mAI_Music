@@ -4,7 +4,12 @@ import { searchDeezer, type SearchType } from "../services/deezerSearch.ts";
 const searchRouter = Router();
 
 function isSearchType(value: string): value is SearchType {
-  return value === "track" || value === "artist" || value === "album" || value === "all";
+  return (
+    value === "track" ||
+    value === "artist" ||
+    value === "album" ||
+    value === "all"
+  );
 }
 
 searchRouter.get("/search", async (req: Request, res: Response) => {
@@ -19,7 +24,9 @@ searchRouter.get("/search", async (req: Request, res: Response) => {
     }
 
     if (!isSearchType(rawType)) {
-      return res.status(400).json({ error: "type ungültig (track|artist|album|all)" });
+      return res
+        .status(400)
+        .json({ error: "type ungültig (track|artist|album|all)" });
     }
 
     const items = await searchDeezer(query, rawType, limit);
