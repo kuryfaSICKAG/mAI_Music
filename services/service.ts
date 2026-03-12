@@ -149,13 +149,18 @@ export async function getTrackArtistFromID(songID: string): Promise<string> {
   const api = new DeezerAPI();
   try {
     const data = await api.lookupTrack(songID);
-    if (!data) return "Unknown Title";
-    // Deezer track objects usually expose `title` (or `name` / `title_short`)
-    const artist = data.artist.name || data.artist || data.artist_name;
+    if (!data) return "Unknown Artist";
+    const artist =
+      data.artist?.name ||
+      (typeof data.artist === "string" ? data.artist : undefined) ||
+      data.artist_name ||
+      data.contributors?.[0]?.name ||
+      data.track?.artist?.name ||
+      data.track?.artist_name;
     return artist || "Unknown Artist";
   } catch (err: any) {
     console.error("getTrackArtistFromID error:", err?.message || err);
-    return "Unknown Title";
+    return "Unknown Artist";
   }
 }
 
@@ -164,12 +169,11 @@ export async function getTrackDurationFromID(songID: string): Promise<string> {
   try {
     const data = await api.lookupTrack(songID);
     if (!data) return "Unknown Duration";
-    // Deezer track objects usually expose `title` (or `name` / `title_short`)
-    const title = data.duration;
-    return title || "Unknown Duration";
+    const duration = data.duration ?? data.track?.duration;
+    return duration != null ? String(duration) : "Unknown Duration";
   } catch (err: any) {
     console.error("getTrackDurationFromID error:", err?.message || err);
-    return "Unknown Title";
+    return "Unknown Duration";
   }
 }
 
