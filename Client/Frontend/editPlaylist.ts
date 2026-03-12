@@ -1,4 +1,9 @@
-import { ask, askChoice, askConfirm } from "../../services/prompt.ts";
+import {
+  ask,
+  askChoice,
+  askConfirm,
+  waitEnter,
+} from "../../services/prompt.ts";
 import {
   renamePlaylist,
   addSong,
@@ -17,10 +22,39 @@ import {
 import { header } from "../../services/ui.ts";
 import chalk from "chalk";
 import { drawSong } from "./song.ts";
+import { formatSongs } from "../Backend/format.ts";
+
+export async function lookupPlaylist(name: string): Promise<void> {
+  console.clear();
+  header(`Playlist "${name}"`);
+  const playlists = await getPlaylists(activeUser);
+  const playlist = playlists.find((p) => p.name === name);
+
+  if (!playlist || playlist.songs.length === 0) {
+    console.log("Keine Songs in dieser Playlist.");
+    await waitEnter();
+    return drawPlaylist(activeUser);
+  }
+
+  console.log(await formatSongs(playlist));
+  console.log("");
+  await waitEnter();
+  return drawPlaylist(activeUser);
+}
 
 export async function editPlaylist(name: string): Promise<void> {
   console.clear();
   header(`Playlist "${name}" bearbeiten`);
+
+  const playlists = await getPlaylists(activeUser);
+  const playlist = playlists.find((p) => p.name === name);
+
+  if (!playlist || playlist.songs.length === 0) {
+    console.log("Keine Songs in dieser Playlist.\n");
+  } else {
+    console.log(await formatSongs(playlist));
+    console.log("");
+  }
 
   const action = await askChoice("Option wählen:", [
     { name: "Playlist umbenennen", value: "rename" },
@@ -74,9 +108,6 @@ export async function editPlaylist(name: string): Promise<void> {
   }
 
   if (action === "remove") {
-    const playlists = await getPlaylists(activeUser);
-    const playlist = playlists.find((p) => p.name === name);
-
     if (!playlist || playlist.songs.length === 0) {
       console.log("Keine Songs in dieser Playlist.");
       return editPlaylist(name);
@@ -93,13 +124,18 @@ export async function editPlaylist(name: string): Promise<void> {
       }),
     );
 
-    const selected = await askChoice(
-      "Song auswählen:",
-      songs.map((s) => ({
+    const selected = await askChoice("Song auswählen:", [
+      ...songs.map((s) => ({
         name: s.label,
         value: s.id,
       })),
-    );
+      {
+        name: "Abbrechen",
+        value: null,
+      },
+    ]);
+
+    if (selected === null) return editPlaylist(name);
 
     const idx = playlist.songs.indexOf(selected);
     if (idx >= 0) await removeSongByIndex(activeUser, name, idx);

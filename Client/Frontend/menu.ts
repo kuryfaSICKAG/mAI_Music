@@ -5,6 +5,7 @@ import { drawSong } from "./song.ts";
 import { drawOnline } from "./online.ts";
 import { drawAI } from "./ai.ts";
 import { header } from "../../services/ui.ts";
+import ora from "ora";
 
 export function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -15,8 +16,9 @@ export async function drawMenu(
   loggedIn: boolean,
 ): Promise<void> {
   if (!loggedIn) {
-    console.log(`Du wirst eingeloggt als "${activeUser}"`);
-    await sleep(1500);
+    const spinner = ora(`Du wirst eingeloggt als "${activeUser}"...`).start();
+    await sleep(1500); // deine künstliche Wartezeit
+    spinner.succeed("Fertig!");
   }
 
   console.clear();

@@ -9,11 +9,12 @@ import { getPlaylists } from "../Backend/playlist.ts";
 import {
   listPublicPlaylists,
   getPublicPlaylistDetail,
-  getSongInfoPublic,
   sendPlaylist,
 } from "../Backend/onlineServices.ts";
+import { formatSongs } from "../Backend/format.ts";
 import { sleep } from "./menu.ts";
 import { header } from "../../services/ui.ts";
+import { checkForUser } from "../Backend/authentication.ts";
 
 export async function drawOnline(activeUser: string) {
   console.clear();
@@ -33,15 +34,32 @@ export async function drawOnline(activeUser: string) {
       return drawOnline(activeUser);
     }
 
-    const selected = await askChoice(
-      "Welche Playlist verschicken?",
-      lists.map((pl) => ({
+    const selected = await askChoice("Welche Playlist verschicken?", [
+      ...lists.map((pl) => ({
         name: `${pl.name} (${pl.songs.length} Songs)`,
         value: pl.name,
       })),
-    );
+      {
+        name: "❌ Abbrechen",
+        value: null,
+      },
+    ]);
+
+    if (selected === null) {
+      console.log("Auswahl abgebrochen.");
+      await waitEnter();
+      return;
+    }
 
     const goalUser = await ask("An welchen Benutzer senden?");
+
+    const check = await checkForUser(goalUser);
+    if (!check.ok) {
+      console.log(`# ${check.error}`);
+      await waitEnter();
+      return drawOnline(activeUser);
+    }
+
     const result = await sendPlaylist(activeUser, goalUser, selected);
 
     if (!result.ok) console.log(`# Fehler: ${result.error}`);
@@ -66,13 +84,20 @@ export async function drawOnline(activeUser: string) {
       return drawOnline(activeUser);
     }
 
-    const chosen = await askChoice(
-      "Playlist auswählen:",
-      items.map((pl) => ({
+    const chosen = await askChoice("Playlist auswählen:", [
+      ...items.map((pl) => ({
         name: `${pl.name} — by ${pl.username} — ${pl.songs.length} Songs`,
         value: { user: pl.username, name: pl.name },
       })),
-    );
+      {
+        name: "❌ Abbrechen",
+        value: null,
+      },
+    ]);
+
+    if (chosen === null) {
+      return drawOnline(activeUser);
+    }
 
     const d = await getPublicPlaylistDetail(chosen.user, chosen.name);
 
@@ -84,7 +109,7 @@ export async function drawOnline(activeUser: string) {
 
     const detail = d.detail;
     console.clear();
-    console.log(`\n${detail.playlist.name}\n`);
+    header(`${detail.playlist.name} (Public)`);
 
     const songs = detail.playlist.songs;
 
@@ -95,20 +120,8 @@ export async function drawOnline(activeUser: string) {
       return drawOnline(activeUser);
     }
 
-    const viewSong = await askChoice("Song-Detail ansehen:", [
-      { name: "Überspringen", value: null },
-      ...songs.map((id) => ({
-        name: String(id),
-        value: id,
-      })),
-    ]);
-
-    if (viewSong) {
-      const info = await getSongInfoPublic(viewSong);
-      if (info.ok) console.log(info.song);
-      else console.log(`# ${info.error}`);
-      await waitEnter();
-    }
+    console.log(await formatSongs(detail.playlist));
+    console.log("");
 
     const save = await askConfirm("Diese Playlist speichern?");
     if (save) await sendPlaylist(chosen.user, activeUser, detail.playlist.name);
@@ -116,5 +129,7 @@ export async function drawOnline(activeUser: string) {
     return drawOnline(activeUser);
   }
 
-  return drawMenu(activeUser, true);
+  if (action === "back") {
+    return drawMenu(activeUser, true);
+  }
 }

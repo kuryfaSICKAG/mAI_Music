@@ -100,3 +100,34 @@ export async function validateUser(
     return { ok: false, error: e?.message ?? "Netzwerkfehler beim Login." };
   }
 }
+
+export async function checkForUser(
+  username: string,
+): Promise<{ ok: true; username: string } | { ok: false; error: string }> {
+  const base = getServerUrl();
+  if (!base) return { ok: false, error: "Keine Server-Verbindung." };
+
+  try {
+    const res = await fetch(`${base}/auth/check`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username }),
+    });
+
+    const data = await parseJsonSafe(res);
+
+    if (!res.ok) {
+      return {
+        ok: false,
+        error: data?.error ?? "User existiert nicht.",
+      };
+    }
+
+    return {
+      ok: true,
+      username: data?.username ?? username,
+    };
+  } catch (e: any) {
+    return { ok: false, error: e?.message ?? "Netzwerkfehler Usercheckup." };
+  }
+}

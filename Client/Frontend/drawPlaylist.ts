@@ -1,11 +1,16 @@
-import { ask, askChoice, askConfirm } from "../../services/prompt.ts";
+import {
+  ask,
+  askChoice,
+  askConfirm,
+  waitEnter,
+} from "../../services/prompt.ts";
 import { drawMenu } from "./menu.ts";
 import {
   getPlaylists,
   createPlaylist,
   deletePlaylist,
 } from "../Backend/playlist.ts";
-import { editPlaylist } from "./editPlaylist.ts";
+import { editPlaylist, lookupPlaylist } from "./editPlaylist.ts";
 import { formatPlaylists } from "../Backend/format.ts";
 import { header } from "../../services/ui.ts";
 
@@ -18,14 +23,33 @@ export async function drawPlaylist(activeUser: string): Promise<void> {
   else console.log(formatPlaylists(lists));
 
   const choice = await askChoice("Option wählen:", [
+    { name: "Playlist einsehen", value: "lookup"},
     { name: "Playlist erstellen", value: "create" },
     { name: "Playlist bearbeiten", value: "edit" },
     { name: "Playlist löschen", value: "delete" },
     { name: "Zurück", value: "back" },
   ]);
 
+  if (choice === "lookup") {
+    if (lists.length === 0) return drawPlaylist(activeUser);
+
+    const selected = await askChoice(
+        "Welche Playlist einsehen?",
+        lists.map((p) => ({
+        name: `${p.name} (${p.songs.length} Songs)`,
+        value: p.name,
+      })),
+    );
+    await lookupPlaylist(selected);
+  }
+
   if (choice === "create") {
     const name = await ask("Wie soll die Playlist heißen?");
+    if (name === "") {
+      console.log("# Der Name darf nicht leer sein.");
+      await waitEnter();
+      return drawPlaylist(activeUser);
+    }
     await createPlaylist(activeUser, name);
 
     const editNow = await askConfirm(`Playlist "${name}" jetzt bearbeiten?`);

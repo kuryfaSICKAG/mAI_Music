@@ -122,4 +122,29 @@ authRouter.get("/auth/me", (req: Request, res: Response) => {
   return res.json({ ok: true, user: toSafeUser(auth.user) });
 });
 
+
+authRouter.post("/auth/check", async (req: Request, res: Response) => {
+  const { username } = req.body;
+
+  // Validierung
+  if (!username || typeof username !== "string") {
+    return res.status(400).json({ error: "Ungültiger oder fehlender Benutzername." });
+  }
+
+  try {
+    // Beispiel: Datenbank-Abfrage
+    const user = await req.db.users.findOne({ username });
+
+    if (!user) {
+      return res.status(404).json({ error: "User existiert nicht." });
+    }
+
+    return res.status(200).json({ username: user.username });
+  } catch (err) {
+    console.error("Fehler beim Usercheck:", err);
+    return res.status(500).json({ error: "Serverfehler beim Usercheck." });
+  }
+});
+
+
 export { authRouter };
