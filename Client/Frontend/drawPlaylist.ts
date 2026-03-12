@@ -1,4 +1,9 @@
-import { ask, askChoice, askConfirm } from "../../services/prompt.ts";
+import {
+  ask,
+  askChoice,
+  askConfirm,
+  waitEnter,
+} from "../../services/prompt.ts";
 import { drawMenu } from "./menu.ts";
 import {
   getPlaylists,
@@ -26,6 +31,11 @@ export async function drawPlaylist(activeUser: string): Promise<void> {
 
   if (choice === "create") {
     const name = await ask("Wie soll die Playlist heißen?");
+    if (name === "") {
+      console.log("# Der Name darf nicht leer sein.");
+      await waitEnter();
+      return drawPlaylist(activeUser);
+    }
     await createPlaylist(activeUser, name);
 
     const editNow = await askConfirm(`Playlist "${name}" jetzt bearbeiten?`);

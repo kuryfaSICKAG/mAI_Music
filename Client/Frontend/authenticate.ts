@@ -1,7 +1,7 @@
-import { ask, askPassword, askChoice } from "../../services/prompt.ts";
+import { ask, askPassword, askChoice, waitEnter } from "../../services/prompt.ts";
 import { createUser, validateUser } from "../Backend/authentication.ts";
 import { initUser } from "../Backend/playlist.ts";
-import { drawMenu } from "./menu.ts";
+import { drawMenu, sleep } from "./menu.ts";
 import { header } from "../../services/ui.ts";
 
 export let activeUser = "";
@@ -14,15 +14,23 @@ async function signUpUser(): Promise<void> {
   const pw = await askPassword("Passwort:");
   const pw2 = await askPassword("Passwort erneut:");
 
+  if(name === "" || pw === "") {
+    console.log("\n# Benutzername oder Passwort dürfen nicht leer sein.")
+    await waitEnter()
+    return authenticate()
+  }
+
   if (pw !== pw2) {
     console.log("\n# Passwörter stimmen nicht überein.");
-    return signUpUser();
+    await waitEnter()
+    return authenticate();
   }
 
   const result = await createUser(name, pw);
   if (!result.ok) {
     console.log(`# ${result.error}`);
-    return signUpUser();
+    await waitEnter()
+    return authenticate();
   }
 
   activeUser = result.username;
@@ -38,10 +46,17 @@ async function loginUser(): Promise<void> {
   const name = await ask("Benutzername:");
   const pw = await askPassword("Passwort:");
 
+  if(name === "" || pw === "") {
+    console.log("\n# Benutzername oder Passwort dürfen nicht leer sein.")
+    await waitEnter()
+    return authenticate()
+  }
+
   const result = await validateUser(name, pw);
   if (!result.ok) {
     console.log(`# ${result.error}`);
-    return loginUser();
+    await waitEnter()
+    return authenticate();
   }
 
   activeUser = result.username;
