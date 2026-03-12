@@ -71,8 +71,8 @@ export async function authenticate(): Promise<void> {
   console.log("(Bitte melden Sie sich an)\n");
 
   const action = await askChoice("Bitte auswählen:", [
-    { name: "Konto erstellen", value: "signup" },
     { name: "Einloggen", value: "login" },
+    { name: "Konto erstellen", value: "signup" },
     { name: "Beenden", value: "exit" },
   ]);
 

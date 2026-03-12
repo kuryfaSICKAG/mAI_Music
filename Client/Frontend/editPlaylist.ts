@@ -1,4 +1,9 @@
-import { ask, askChoice, askConfirm, waitEnter } from "../../services/prompt.ts";
+import {
+  ask,
+  askChoice,
+  askConfirm,
+  waitEnter,
+} from "../../services/prompt.ts";
 import {
   renamePlaylist,
   addSong,
@@ -119,13 +124,18 @@ export async function editPlaylist(name: string): Promise<void> {
       }),
     );
 
-    const selected = await askChoice(
-      "Song auswählen:",
-      songs.map((s) => ({
+    const selected = await askChoice("Song auswählen:", [
+      ...songs.map((s) => ({
         name: s.label,
         value: s.id,
       })),
-    );
+      {
+        name: "Abbrechen",
+        value: null,
+      },
+    ]);
+
+    if (selected === null) return editPlaylist(name);
 
     const idx = playlist.songs.indexOf(selected);
     if (idx >= 0) await removeSongByIndex(activeUser, name, idx);
