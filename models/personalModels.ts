@@ -13,22 +13,22 @@ export interface Playlist {
 export type SongID = string;
 
 export interface Song {
-  id: SongID,
-  name: string,
-  artist: Artist[],
-  genre: Genre[],
-  year: number,
-  duration: number | string,
-  album?: Album | undefined,
+  id: SongID;
+  name: string;
+  artist: Artist[];
+  genre: Genre[];
+  year: number;
+  duration: number | string;
+  album?: Album | undefined;
 }
 
 export interface Album {
-    name: string,
-    artist: Artist[],
-    genre: Genre[],
-    year: number,
-  songs: SongID[],
-} 
+  name: string;
+  artist: Artist[];
+  genre: Genre[];
+  year: number;
+  songs: SongID[];
+}
 
 export type Genre =
   | "pop"
@@ -48,9 +48,8 @@ export type Genre =
   | "indie";
 
 export interface Artist {
-    name: string,
-    nationality: string,
-    age: number,
-    genre: Genre[]
+  name: string;
+  nationality: string;
+  age: number;
+  genre: Genre[];
 }
-

@@ -18,8 +18,13 @@ profileRouter.patch("/profile/me", (req: Request, res: Response) => {
   const { favoriteGenres, locale, onboardingDone } = req.body ?? {};
 
   if (favoriteGenres !== undefined) {
-    if (!Array.isArray(favoriteGenres) || favoriteGenres.some((g) => typeof g !== "string")) {
-      return res.status(400).json({ error: "favoriteGenres muss string[] sein" });
+    if (
+      !Array.isArray(favoriteGenres) ||
+      favoriteGenres.some((g) => typeof g !== "string")
+    ) {
+      return res
+        .status(400)
+        .json({ error: "favoriteGenres muss string[] sein" });
     }
     auth.user.profile.favoriteGenres = favoriteGenres;
   }
@@ -33,7 +38,9 @@ profileRouter.patch("/profile/me", (req: Request, res: Response) => {
 
   if (onboardingDone !== undefined) {
     if (typeof onboardingDone !== "boolean") {
-      return res.status(400).json({ error: "onboardingDone muss boolean sein" });
+      return res
+        .status(400)
+        .json({ error: "onboardingDone muss boolean sein" });
     }
     auth.user.profile.onboardingDone = onboardingDone;
   }

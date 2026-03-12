@@ -11,7 +11,9 @@ export function formatPlaylists(playlists: Playlist[]): string {
   return playlists
     .map((pl, idx) => {
       const isPublic = (pl as any).status === "public";
-      const icon = isPublic ? chalk.green("🔓 Public") : chalk.yellow("🔒 Private");
+      const icon = isPublic
+        ? chalk.green("🔓 Public")
+        : chalk.yellow("🔒 Private");
 
       return `${chalk.cyan(idx + 1 + ".")}  ${chalk.bold(pl.name)}  ${icon}`;
     })

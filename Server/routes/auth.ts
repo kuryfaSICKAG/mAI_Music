@@ -1,6 +1,12 @@
 import { Router, type Request, type Response } from "express";
 import { loadUsers, saveUsers } from "../Data/data.ts";
-import { createSession, defaultProfile, getAuthContext, getTokenFromRequest, toSafeUser } from "../serverContext.ts";
+import {
+  createSession,
+  defaultProfile,
+  getAuthContext,
+  getTokenFromRequest,
+  toSafeUser,
+} from "../serverContext.ts";
 
 const authRouter = Router();
 
@@ -19,12 +25,22 @@ authRouter.post("/auth/create", (req: Request, res: Response) => {
     return res.status(400).json({ error: "Benutzer existiert bereits!" });
   }
 
-  data.users.push({ username, password, profile: defaultProfile(), favorites: [] });
+  data.users.push({
+    username,
+    password,
+    profile: defaultProfile(),
+    favorites: [],
+  });
   const session = createSession(username);
   data.authSessions.push({ ...session, username });
   saveUsers(data);
 
-  return res.json({ message: "User erstellt", username, token: session.token, expiresAt: session.expiresAt });
+  return res.json({
+    message: "User erstellt",
+    username,
+    token: session.token,
+    expiresAt: session.expiresAt,
+  });
 });
 
 authRouter.post("/auth/login", (req: Request, res: Response) => {
@@ -36,10 +52,14 @@ authRouter.post("/auth/login", (req: Request, res: Response) => {
   }
 
   const data = loadUsers();
-  const user = data.users.find((u: any) => u.username === username && u.password === password);
+  const user = data.users.find(
+    (u: any) => u.username === username && u.password === password,
+  );
 
   if (!user) {
-    return res.status(401).json({ error: "Benutzername oder Passwort falsch!" });
+    return res
+      .status(401)
+      .json({ error: "Benutzername oder Passwort falsch!" });
   }
 
   const session = createSession(username);
@@ -47,7 +67,12 @@ authRouter.post("/auth/login", (req: Request, res: Response) => {
   data.authSessions.push({ ...session, username });
   saveUsers(data);
 
-  return res.json({ message: "Login erfolgreich", username, token: session.token, expiresAt: session.expiresAt });
+  return res.json({
+    message: "Login erfolgreich",
+    username,
+    token: session.token,
+    expiresAt: session.expiresAt,
+  });
 });
 
 authRouter.post("/auth/logout", (req: Request, res: Response) => {

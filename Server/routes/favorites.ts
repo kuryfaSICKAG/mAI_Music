@@ -8,7 +8,10 @@ favoritesRouter.get("/favorites", (req: Request, res: Response) => {
   const auth = getAuthContext(req);
   if (!auth) return res.status(401).json({ error: "Nicht authentifiziert" });
 
-  return res.json({ username: auth.user.username, favorites: auth.user.favorites });
+  return res.json({
+    username: auth.user.username,
+    favorites: auth.user.favorites,
+  });
 });
 
 favoritesRouter.post("/favorites/song", (req: Request, res: Response) => {
@@ -24,7 +27,8 @@ favoritesRouter.post("/favorites/song", (req: Request, res: Response) => {
   const alreadyExists = auth.user.favorites.some((s: any) => {
     if (songId && String(s?.id ?? "") === songId) return true;
     return (
-      String(s?.name ?? "").toLowerCase() === String(song?.name ?? "").toLowerCase() &&
+      String(s?.name ?? "").toLowerCase() ===
+        String(song?.name ?? "").toLowerCase() &&
       Number(s?.year ?? 0) === Number(song?.year ?? 0)
     );
   });
@@ -43,13 +47,18 @@ favoritesRouter.delete("/favorites/song", (req: Request, res: Response) => {
   if (!auth) return res.status(401).json({ error: "Nicht authentifiziert" });
 
   const songId = String(req.body?.songId ?? "").trim();
-  const name = String(req.body?.name ?? "").trim().toLowerCase();
+  const name = String(req.body?.name ?? "")
+    .trim()
+    .toLowerCase();
   const year = req.body?.year !== undefined ? Number(req.body.year) : undefined;
 
   const next = auth.user.favorites.filter((s: any) => {
     if (songId) return String(s?.id ?? "") !== songId;
     if (name) {
-      const sameName = String(s?.name ?? "").trim().toLowerCase() === name;
+      const sameName =
+        String(s?.name ?? "")
+          .trim()
+          .toLowerCase() === name;
       if (year === undefined) return !sameName;
       return !(sameName && Number(s?.year ?? 0) === year);
     }

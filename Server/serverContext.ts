@@ -1,6 +1,13 @@
 import { type Request } from "express";
 import { DeezerAPI } from "../apiServices/deezerAPI/deezer.ts";
-import { loadPlaylists, loadUsers, saveUsers, type UserProfile, type UserRecord, type UsersDB } from "./Data/data.ts";
+import {
+  loadPlaylists,
+  loadUsers,
+  saveUsers,
+  type UserProfile,
+  type UserRecord,
+  type UsersDB,
+} from "./Data/data.ts";
 import type { Status } from "../models/personalModels.ts";
 import { savePlaylists } from "./Data/data.ts";
 
@@ -28,7 +35,11 @@ export function toSafeUser(user: UserRecord) {
   };
 }
 
-export function createSession(username: string): { token: string; createdAt: string; expiresAt: string } {
+export function createSession(username: string): {
+  token: string;
+  createdAt: string;
+  expiresAt: string;
+} {
   const token = createId();
   const createdAt = new Date().toISOString();
   const expiresAt = new Date(Date.now() + SESSION_TTL_MS).toISOString();
@@ -44,13 +55,17 @@ export function getTokenFromRequest(req: Request): string | null {
   return typeof xToken === "string" && xToken.trim() ? xToken.trim() : null;
 }
 
-export function getAuthContext(req: Request): { db: UsersDB; user: UserRecord; token: string } | null {
+export function getAuthContext(
+  req: Request,
+): { db: UsersDB; user: UserRecord; token: string } | null {
   const token = getTokenFromRequest(req);
   if (!token) return null;
 
   const db = loadUsers();
   const now = Date.now();
-  const sessions = db.authSessions.filter((s) => new Date(s.expiresAt).getTime() > now);
+  const sessions = db.authSessions.filter(
+    (s) => new Date(s.expiresAt).getTime() > now,
+  );
   if (sessions.length !== db.authSessions.length) {
     db.authSessions = sessions;
     saveUsers(db);
@@ -65,10 +80,14 @@ export function getAuthContext(req: Request): { db: UsersDB; user: UserRecord; t
   return { db, user, token };
 }
 
-export function resolveEffectiveUsername(req: Request, bodyUsername?: string): string | null {
+export function resolveEffectiveUsername(
+  req: Request,
+  bodyUsername?: string,
+): string | null {
   const auth = getAuthContext(req);
   if (auth) return auth.user.username;
-  if (typeof bodyUsername === "string" && bodyUsername.trim()) return bodyUsername.trim();
+  if (typeof bodyUsername === "string" && bodyUsername.trim())
+    return bodyUsername.trim();
   return null;
 }
 
@@ -76,8 +95,10 @@ export function saveSongs(songs: any): string[] {
   if (!Array.isArray(songs)) return [];
   return songs
     .map((song: any) => {
-      if (typeof song === "string" || typeof song === "number") return String(song);
-      if (song && typeof song === "object" && song.id != null) return String(song.id);
+      if (typeof song === "string" || typeof song === "number")
+        return String(song);
+      if (song && typeof song === "object" && song.id != null)
+        return String(song.id);
       return "";
     })
     .filter((id: string) => id.length > 0);
@@ -90,10 +111,9 @@ export function findPlaylist(username: string, playlistName: string) {
   return { db, userPlaylists, playlist };
 }
 
-
 export function getPlaylistStatusServer(
   username: string,
-  playlistName: string
+  playlistName: string,
 ): Status | null {
   const { playlist } = findPlaylist(username, playlistName);
   if (!playlist) return null;
@@ -108,7 +128,7 @@ export function getPlaylistStatusServer(
 export function setPlaylistStatusServer(
   username: string,
   playlistName: string,
-  status: Status
+  status: Status,
 ): boolean {
   if (status !== "public" && status !== "private") return false;
 
@@ -125,7 +145,7 @@ export function setPlaylistStatusServer(
 
 export function togglePlaylistStatusServer(
   username: string,
-  playlistName: string
+  playlistName: string,
 ): Status | null {
   const current = getPlaylistStatusServer(username, playlistName);
   if (!current) return null;

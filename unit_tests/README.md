@@ -22,12 +22,14 @@ unit_tests/
 ## Test-Module
 
 ### 🔧 data.test.ts
+
 - **JSON Verwaltung**: loadJSON, saveJSON Funktionen
 - **Benutzer Management**: Benutzer erstellen, speichern, laden
 - **Playlist Management**: Playlist-Daten persistieren
 - **Validierung**: Datenstruktur Integration
 
 ### 🖥️ serverContext.test.ts
+
 - **Token Management**: Bearer Token Extraktion
 - **Session Management**: Session-Erstellung und TTL
 - **Hilfsfunktionen**: createId, defaultProfile, toSafeUser
@@ -35,6 +37,7 @@ unit_tests/
 - **Playlist Operationen**: Status und Verwaltung
 
 ### 🎵 deezer.test.ts
+
 - **Track Suche**: Suche nach Variationen
 - **Track Lookup**: Details abrufen
 - **Artist/Album Suche**: Künstler- und Album-Suche
@@ -42,12 +45,14 @@ unit_tests/
 - **URL Encoding**: Spezialzeichen in Anfragen
 
 ### 🔧 service.test.ts
+
 - **Song Search**: Suchergebnisse, State Management
 - **Track Info**: Titel-Abruf mit Fallback
 - **Fehlerbehandlung**: API Fehler, leere Ergebnisse
 - **Edge Cases**: Große Suchergebnisse, Sonderzeichen
 
 ### 📝 playlists.test.ts
+
 - **Playlist Erstellung**: Duplikaterkennung, Status-Handling
 - **Playlist Löschung**: Entfernen, Error Cases
 - **Playlist Umbenennung**: Namenskonfikte
@@ -56,6 +61,7 @@ unit_tests/
 - **Validierung**: Feld-Validierung, Status-Werte
 
 ### 📊 models.test.ts
+
 - **Playlist Model**: Struktur und Validierung
 - **Song Model**: Felder, optionale Eigenschaften
 - **Album Model**: Album-Struktur
@@ -66,11 +72,13 @@ unit_tests/
 ## Installation & Setup
 
 1. **Dependencies installieren**:
+
 ```bash
 npm install
 ```
 
 2. **Vitest wird als devDependency installiert**:
+
 ```bash
 npm install -D vitest @vitest/ui
 ```
@@ -78,26 +86,31 @@ npm install -D vitest @vitest/ui
 ## Test Commands
 
 ### Standard Tests (einmalige Ausführung)
+
 ```bash
 npm test
 ```
 
 ### Watch-Modus (Live-Reload bei Änderungen)
+
 ```bash
 npm run test:watch
 ```
 
 ### UI-Modus (Visuelle Interface)
+
 ```bash
 npm run test:ui
 ```
 
 ### Benutzerdefinierten Test-Runner verwenden
+
 ```bash
 npm run test:runner
 ```
 
 **Dieser Runner zeigt einen schönen Fortschritt in der Konsole mit:**
+
 - 🎵 Projekt-Header mit ASCII-Art
 - 📋 Liste aller Test-Dateien
 - ⏳ Live Test-Ausführung
@@ -110,17 +123,20 @@ npm run test:runner
 Die Tests decken folgende Szenarien ab:
 
 ### Happy Path
+
 - ✅ Erfolgreiche Operationen
 - ✅ Gültige Eingaben
 - ✅ Korrekte Ausgaben
 
 ### Edge Cases
+
 - 🔄 Leere Arrays
 - 🔄 Null/Undefined Werte
 - 🔄 Sehr große Datenmengen
 - 🔄 Sonderzeichen in Strings
 
 ### Error Cases
+
 - ❌ API-Fehler
 - ❌ Netzwerk-Fehler
 - ❌ Ungültige Eingaben
@@ -140,6 +156,7 @@ Die Tests verwenden **Vitest**, ein schnelles Unit-Test-Framework für TypeScrip
 ### Vitest Config
 
 Siehe `vitest.config.ts` für Konfiguration:
+
 - Node.js Environment
 - Global Test Functions
 - Code Coverage Provider (v8)
@@ -149,26 +166,26 @@ Siehe `vitest.config.ts` für Konfiguration:
 ## Struktur einer Test-Datei
 
 ```typescript
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from "vitest";
 
-describe('Module Name', () => {
+describe("Module Name", () => {
   beforeEach(() => {
     // Setup vor jedem Test
   });
 
-  it('should do something specific', () => {
+  it("should do something specific", () => {
     // Arrange
     const input = "test";
-    
+
     // Act
     const result = functionUnderTest(input);
-    
+
     // Assert
     expect(result).toBe("expected");
   });
 
-  describe('Nested Feature', () => {
-    it('should handle edge case', () => {
+  describe("Nested Feature", () => {
+    it("should handle edge case", () => {
       expect(true).toBe(true);
     });
   });
@@ -201,6 +218,7 @@ npm test  # Auf CI-System ausführen
 ```
 
 Der Exit-Code ist:
+
 - `0` wenn alle Tests bestanden
 - `1` wenn Tests fehlgeschlagen sind
 
@@ -213,6 +231,7 @@ Der Exit-Code ist:
 ## Kontakt & Support
 
 Bei Fragen zu den Tests:
+
 1. Konsultieren Sie die Vitest-Dokumentation
 2. Prüfen Sie existierende Test-Beispiele in dieser Suite
 3. Passen Sie Tests basierend auf neuen Features an
