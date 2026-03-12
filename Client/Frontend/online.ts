@@ -9,9 +9,9 @@ import { getPlaylists } from "../Backend/playlist.ts";
 import {
   listPublicPlaylists,
   getPublicPlaylistDetail,
-  getSongInfoPublic,
   sendPlaylist,
 } from "../Backend/onlineServices.ts";
+import { formatSongs } from "../Backend/format.ts";
 import { sleep } from "./menu.ts";
 import { header } from "../../services/ui.ts";
 import { checkForUser } from "../Backend/authentication.ts";
@@ -96,9 +96,7 @@ export async function drawOnline(activeUser: string) {
     ]);
 
     if (chosen === null) {
-      console.log("Auswahl abgebrochen.");
-      await waitEnter();
-      return;
+      return drawOnline(activeUser);
     }
 
     const d = await getPublicPlaylistDetail(chosen.user, chosen.name);
@@ -111,7 +109,7 @@ export async function drawOnline(activeUser: string) {
 
     const detail = d.detail;
     console.clear();
-    console.log(`\n${detail.playlist.name}\n`);
+    header(`${detail.playlist.name} (Public)`);
 
     const songs = detail.playlist.songs;
 
@@ -122,20 +120,8 @@ export async function drawOnline(activeUser: string) {
       return drawOnline(activeUser);
     }
 
-    const viewSong = await askChoice("Song-Detail ansehen:", [
-      { name: "Überspringen", value: null },
-      ...songs.map((id) => ({
-        name: String(id),
-        value: id,
-      })),
-    ]);
-
-    if (viewSong) {
-      const info = await getSongInfoPublic(viewSong);
-      if (info.ok) console.log(info.song);
-      else console.log(`# ${info.error}`);
-      await waitEnter();
-    }
+    console.log(await formatSongs(detail.playlist));
+    console.log("");
 
     const save = await askConfirm("Diese Playlist speichern?");
     if (save) await sendPlaylist(chosen.user, activeUser, detail.playlist.name);
