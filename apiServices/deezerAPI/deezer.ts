@@ -22,6 +22,12 @@ export class DeezerAPI {
     );
   }
 
+  getArtistTopTracks(artistId: string, limit = 10) {
+    return this.get<{ data: any[] }>(
+      `artist/${encodeURIComponent(artistId)}/top?limit=${encodeURIComponent(String(limit))}`
+    );
+  }
+
   // --- Album search ---
   searchAlbum(name: string) {
     return this.get<{ data: any[] }>(
@@ -38,6 +44,21 @@ export class DeezerAPI {
     // Deezer supports track-only search!
     return this.get<{ data: any[] }>(
       `search?q=track:"${encodeURIComponent(title)}"`
+    );
+  }
+
+  /** Präzisere Suche mit Titel UND Interpret für deterministisches Matching */
+  searchTrackPrecise(title: string, artist: string) {
+    const query = `artist:"${artist}" track:"${title}"`;
+    return this.get<{ data: any[] }>(
+      `search?q=${encodeURIComponent(query)}`
+    );
+  }
+
+  /** Allgemeine Freitextsuche ohne Feldqualifikatoren */
+  searchPlain(query: string) {
+    return this.get<{ data: any[] }>(
+      `search?q=${encodeURIComponent(query)}`
     );
   }
 

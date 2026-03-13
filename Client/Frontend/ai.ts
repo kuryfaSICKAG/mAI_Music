@@ -6,7 +6,7 @@ import { drawMenu } from "./menu.ts";
 import {
   createAIPlaylist,
   AIPlaylistFromPlaylist,
-} from "../../services/service.ts";
+} from "../../services/aiService.ts";
 
 export async function drawAI(activeUser: string) {
   console.clear();
