@@ -233,4 +233,9 @@ export async function addToPlaylist(
 
 // }
 
-export { createAIPlaylist, AIPlaylistFromPlaylist } from "./aiService.ts";
+export {
+  createAIPlaylist,
+  AIPlaylistFromPlaylist,
+  addAISongsToPlaylist,
+  addAIToSamePlaylistFromPlaylistAnalysis,
+} from "./aiService.ts";

@@ -687,3 +687,195 @@ export async function AIPlaylistFromPlaylist(
 		return false;
 	}
 }
+
+export async function addAIToSamePlaylistFromPlaylistAnalysis(
+	username: string,
+	playlistName: string,
+): Promise<boolean> {
+	try {
+		const filePath = getPlaylistDataPath();
+		const raw = await fs.readFile(filePath, "utf8");
+		const data: any = JSON.parse(raw || "{}");
+		const userPlaylists = data?.playlistsByUser?.[username];
+
+		if (!Array.isArray(userPlaylists)) {
+			console.error(`User "${username}" wurde nicht gefunden.`);
+			return false;
+		}
+
+		const basePlaylist = userPlaylists.find(
+			(playlist: any) =>
+				String(playlist?.name ?? "")
+					.trim()
+					.toLowerCase() === playlistName.trim().toLowerCase(),
+		);
+
+		if (!basePlaylist) {
+			console.error(`Playlist "${playlistName}" wurde nicht gefunden.`);
+			return false;
+		}
+
+		const songIds: string[] = Array.isArray(basePlaylist.songs)
+			? Array.from(
+					new Set(
+						basePlaylist.songs
+							.map((id: any) => String(id).trim())
+							.filter((id: string) => id.length > 0),
+					),
+				)
+			: [];
+
+		if (songIds.length === 0) {
+			console.error(`Playlist "${playlistName}" enthaelt keine Songs.`);
+			return false;
+		}
+
+		const deezerApi = new DeezerAPI();
+		const sourceSongs: string[] = [];
+
+		for (const songId of songIds.slice(0, 25)) {
+			try {
+				const track = await deezerApi.lookupTrack(songId);
+				const title = track?.title || track?.title_short || track?.name;
+				const artist = track?.artist?.name || track?.artist_name;
+				if (title && artist) {
+					sourceSongs.push(`${title} - ${artist}`);
+				}
+			} catch {
+				// einzelne fehlerhafte IDs ueberspringen
+			}
+		}
+
+		if (sourceSongs.length === 0) {
+			console.error("Die Songs der Playlist konnten nicht aufgeloest werden.");
+			return false;
+		}
+
+		console.log(
+			`\n🧠 Analysiere Playlist "${playlistName}" und erweitere sie mit passenden Songs...`,
+		);
+
+		const profile = await generatePlaylistProfileFromSongs(sourceSongs);
+		if (!profile?.prompt) {
+			console.error("KI konnte keinen Prompt aus der Playlist erzeugen.");
+			return false;
+		}
+
+		console.log(`\n📝 Generierter Prompt: ${profile.prompt}`);
+		return addAISongsToPlaylist(username, playlistName, profile.prompt, {
+			languageHint: profile.languageHint,
+			referenceArtists: profile.referenceArtists,
+			referenceSongs: sourceSongs,
+		});
+	} catch (err: any) {
+		console.error(
+			"Fehler in addAIToSamePlaylistFromPlaylistAnalysis:",
+			err?.message || err,
+		);
+		return false;
+	}
+}
+
+export async function addAISongsToPlaylist(
+	username: string,
+	targetPlaylistName: string,
+	mood: string,
+	constraints?: PlaylistGenerationConstraints,
+): Promise<boolean> {
+	try {
+		const requestedArtists = extractArtistNamesFromRequest(mood);
+		let foundSongs: MatchedSong[] = [];
+
+		if (requestedArtists.length > 0) {
+			console.log(
+				`\n🎵 Generiere Songs zum Hinzufuegen aus Deezer-Top-Tracks fuer: ${requestedArtists.join(", ")}...`,
+			);
+			foundSongs = await buildArtistDrivenPlaylist(mood);
+		} else {
+			console.log(
+				`\n🎵 Generiere Songs zum Hinzufuegen aus Anfrage: "${mood}"...`,
+			);
+			foundSongs = await generateSongsFromPrompt(mood, constraints);
+		}
+
+		if (foundSongs.length === 0) {
+			console.error("❌ Keine Songs in Deezer gefunden.");
+			return false;
+		}
+
+		const filePath = getPlaylistDataPath();
+		const raw = await fs.readFile(filePath, "utf8");
+		const data: any = JSON.parse(raw || "{}");
+		const userPlaylists = data?.playlistsByUser?.[username];
+
+		if (!Array.isArray(userPlaylists)) {
+			console.error(`User "${username}" wurde nicht gefunden.`);
+			return false;
+		}
+
+		const targetPlaylist = userPlaylists.find(
+			(playlist: any) =>
+				String(playlist?.name ?? "")
+					.trim()
+					.toLowerCase() === targetPlaylistName.trim().toLowerCase(),
+		);
+
+		if (!targetPlaylist) {
+			console.error(`Playlist "${targetPlaylistName}" wurde nicht gefunden.`);
+			return false;
+		}
+
+		if (!Array.isArray(targetPlaylist.songs)) {
+			targetPlaylist.songs = [];
+		}
+
+		const existingSongIds = new Set(
+			targetPlaylist.songs.map((songId: any) => String(songId).trim()),
+		);
+		const songsToAdd = foundSongs.filter(
+			(song) => !existingSongIds.has(String(song.id)),
+		);
+
+		if (songsToAdd.length === 0) {
+			console.log(
+				`\nℹ️ Alle gefundenen Songs sind bereits in der Playlist "${targetPlaylistName}" enthalten.`,
+			);
+			return false;
+		}
+
+		console.log(
+			`\n📋 Folgende ${songsToAdd.length} neuen Songs werden zu "${targetPlaylistName}" hinzugefuegt:\n`,
+		);
+		songsToAdd.forEach((song, idx) => {
+			console.log(`${idx + 1}. ${song.title} - ${song.artist}`);
+		});
+
+		const skippedCount = foundSongs.length - songsToAdd.length;
+		if (skippedCount > 0) {
+			console.log(
+				`\nℹ️ ${skippedCount} Song(s) wurden uebersprungen, weil sie bereits vorhanden sind.`,
+			);
+		}
+
+		console.log("\n");
+		const confirm = await ask(
+			`Soll(en) ${songsToAdd.length} Song(s) zur Playlist "${targetPlaylistName}" hinzugefuegt werden? (y/n): `,
+		);
+
+		if (confirm.toLowerCase() !== "y") {
+			console.log("Songs wurden nicht hinzugefuegt.");
+			return false;
+		}
+
+		targetPlaylist.songs.push(...songsToAdd.map((song) => String(song.id)));
+		await fs.writeFile(filePath, JSON.stringify(data, null, 2), "utf8");
+
+		console.log(
+			`✅ ${songsToAdd.length} Song(s) wurden zu "${targetPlaylistName}" hinzugefuegt!`,
+		);
+		return true;
+	} catch (err: any) {
+		console.error("❌ Fehler in addAISongsToPlaylist:", err?.message || err);
+		return false;
+	}
+}
