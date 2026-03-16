@@ -1,9 +1,11 @@
 import { DeezerAPI } from "../apiServices/deezerAPI/deezer.ts";
 import { ask } from "./prompt.ts";
-import { promises as fs } from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
 import { OpenAI } from "openai";
+import {
+	getPlaylists,
+	createPlaylist,
+	addSong,
+} from "../Client/Backend/playlist.ts";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -319,12 +321,6 @@ async function findBestDeezerMatch(suggestion: string): Promise<MatchedSong | nu
 	};
 }
 
-function getPlaylistDataPath(): string {
-	const currentFile = fileURLToPath(import.meta.url);
-	const currentDir = path.dirname(currentFile);
-	return path.resolve(currentDir, "..", "Server", "Data", "playlist_data.json");
-}
-
 async function generateSongsFromPrompt(
 	request: string,
 	constraints?: PlaylistGenerationConstraints,
@@ -560,34 +556,20 @@ export async function createAIPlaylist(
 
 		console.log("\n💾 Erstelle Playlist und füge Songs hinzu...");
 
-		const filePath = getPlaylistDataPath();
-		const raw = await fs.readFile(filePath, "utf8");
-		const data: any = JSON.parse(raw || "{}");
-
-		if (!data.playlistsByUser) data.playlistsByUser = {};
-		if (!data.playlistsByUser[username]) data.playlistsByUser[username] = [];
-
-		const playlistExists = data.playlistsByUser[username].some(
-			(playlist: any) =>
-				String(playlist?.name ?? "")
-					.trim()
-					.toLowerCase() === playlistName.trim().toLowerCase(),
-		);
-
-		if (playlistExists) {
-			console.error(
-				`Playlist "${playlistName}" existiert bereits für User "${username}".`,
-			);
+		const createResult = await createPlaylist(username, playlistName);
+		if (createResult === "exists") {
+			console.error(`Playlist "${playlistName}" existiert bereits für User "${username}".`);
+			return false;
+		}
+		if (createResult === "error") {
+			console.error(`Playlist "${playlistName}" konnte nicht erstellt werden.`);
 			return false;
 		}
 
-		data.playlistsByUser[username].push({
-			name: playlistName,
-			songs: foundSongs.map((song) => String(song.id)),
-			public: false,
-		});
+		for (const song of foundSongs) {
+			await addSong(username, playlistName, String(song.id));
+		}
 
-		await fs.writeFile(filePath, JSON.stringify(data, null, 2), "utf8");
 		console.log(
 			`✅ Playlist "${playlistName}" mit ${foundSongs.length} Songs erstellt und gespeichert!`,
 		);
@@ -604,21 +586,11 @@ export async function AIPlaylistFromPlaylist(
 	basePlaylistName: string,
 ): Promise<boolean> {
 	try {
-		const filePath = getPlaylistDataPath();
-		const raw = await fs.readFile(filePath, "utf8");
-		const data: any = JSON.parse(raw || "{}");
-		const userPlaylists = data?.playlistsByUser?.[username];
-
-		if (!Array.isArray(userPlaylists)) {
-			console.error(`User "${username}" wurde nicht gefunden.`);
-			return false;
-		}
+		const userPlaylists = await getPlaylists(username);
 
 		const basePlaylist = userPlaylists.find(
-			(playlist: any) =>
-				String(playlist?.name ?? "")
-					.trim()
-					.toLowerCase() === basePlaylistName.trim().toLowerCase(),
+			(pl) =>
+				pl.name.trim().toLowerCase() === basePlaylistName.trim().toLowerCase(),
 		);
 
 		if (!basePlaylist) {
@@ -628,15 +600,13 @@ export async function AIPlaylistFromPlaylist(
 			return false;
 		}
 
-		const songIds: string[] = Array.isArray(basePlaylist.songs)
-			? Array.from(
-					new Set(
-						basePlaylist.songs
-							.map((id: any) => String(id).trim())
-							.filter((id: string) => id.length > 0),
-					),
-				)
-			: [];
+		const songIds: string[] = Array.from(
+			new Set(
+				basePlaylist.songs
+					.map((id: any) => String(id).trim())
+					.filter((id: string) => id.length > 0),
+			),
+		);
 
 		if (songIds.length === 0) {
 			console.error(
@@ -693,21 +663,11 @@ export async function addAIToSamePlaylistFromPlaylistAnalysis(
 	playlistName: string,
 ): Promise<boolean> {
 	try {
-		const filePath = getPlaylistDataPath();
-		const raw = await fs.readFile(filePath, "utf8");
-		const data: any = JSON.parse(raw || "{}");
-		const userPlaylists = data?.playlistsByUser?.[username];
-
-		if (!Array.isArray(userPlaylists)) {
-			console.error(`User "${username}" wurde nicht gefunden.`);
-			return false;
-		}
+		const userPlaylists = await getPlaylists(username);
 
 		const basePlaylist = userPlaylists.find(
-			(playlist: any) =>
-				String(playlist?.name ?? "")
-					.trim()
-					.toLowerCase() === playlistName.trim().toLowerCase(),
+			(pl) =>
+				pl.name.trim().toLowerCase() === playlistName.trim().toLowerCase(),
 		);
 
 		if (!basePlaylist) {
@@ -715,15 +675,13 @@ export async function addAIToSamePlaylistFromPlaylistAnalysis(
 			return false;
 		}
 
-		const songIds: string[] = Array.isArray(basePlaylist.songs)
-			? Array.from(
-					new Set(
-						basePlaylist.songs
-							.map((id: any) => String(id).trim())
-							.filter((id: string) => id.length > 0),
-					),
-				)
-			: [];
+		const songIds: string[] = Array.from(
+			new Set(
+				basePlaylist.songs
+					.map((id: any) => String(id).trim())
+					.filter((id: string) => id.length > 0),
+			),
+		);
 
 		if (songIds.length === 0) {
 			console.error(`Playlist "${playlistName}" enthaelt keine Songs.`);
@@ -803,30 +761,16 @@ export async function addAISongsToPlaylist(
 			return false;
 		}
 
-		const filePath = getPlaylistDataPath();
-		const raw = await fs.readFile(filePath, "utf8");
-		const data: any = JSON.parse(raw || "{}");
-		const userPlaylists = data?.playlistsByUser?.[username];
-
-		if (!Array.isArray(userPlaylists)) {
-			console.error(`User "${username}" wurde nicht gefunden.`);
-			return false;
-		}
+		const userPlaylists = await getPlaylists(username);
 
 		const targetPlaylist = userPlaylists.find(
-			(playlist: any) =>
-				String(playlist?.name ?? "")
-					.trim()
-					.toLowerCase() === targetPlaylistName.trim().toLowerCase(),
+			(pl) =>
+				pl.name.trim().toLowerCase() === targetPlaylistName.trim().toLowerCase(),
 		);
 
 		if (!targetPlaylist) {
 			console.error(`Playlist "${targetPlaylistName}" wurde nicht gefunden.`);
 			return false;
-		}
-
-		if (!Array.isArray(targetPlaylist.songs)) {
-			targetPlaylist.songs = [];
 		}
 
 		const existingSongIds = new Set(
@@ -867,8 +811,9 @@ export async function addAISongsToPlaylist(
 			return false;
 		}
 
-		targetPlaylist.songs.push(...songsToAdd.map((song) => String(song.id)));
-		await fs.writeFile(filePath, JSON.stringify(data, null, 2), "utf8");
+		for (const song of songsToAdd) {
+			await addSong(username, targetPlaylistName, String(song.id));
+		}
 
 		console.log(
 			`✅ ${songsToAdd.length} Song(s) wurden zu "${targetPlaylistName}" hinzugefuegt!`,
