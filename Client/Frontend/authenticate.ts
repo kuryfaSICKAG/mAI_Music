@@ -80,5 +80,5 @@ export async function authenticate(): Promise<void> {
   else if (action === "login") await loginUser();
   else return;
 
-  if (activeUser) drawMenu(activeUser, false);
+  if (activeUser) return drawMenu(activeUser, false);
 }
