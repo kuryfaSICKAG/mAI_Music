@@ -5,7 +5,7 @@ import { authenticate } from "./authenticate.ts";
 
 export async function askConnection() {
   console.clear();
-  header("Willkommen bei mAI music");
+  header("Willkommen bei mAI Music");
   console.log("(Bitte Server auswählen)\n");
 
   const ip = await ask("Server-IP:");

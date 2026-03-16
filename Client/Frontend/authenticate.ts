@@ -67,7 +67,7 @@ async function loginUser(): Promise<void> {
 
 export async function authenticate(): Promise<void> {
   console.clear();
-  header("Willkommen bei mAI music");
+  header("Willkommen bei mAI Music");
   console.log("(Bitte melden Sie sich an)\n");
 
   const action = await askChoice("Bitte auswählen:", [
