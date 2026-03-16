@@ -7,10 +7,10 @@ import {
 import { drawMenu } from "./menu.ts";
 import {
   searchSong,
-  addToPlaylist,
   getTrackNameFromID,
   getTrackArtistFromID,
 } from "../../services/service.ts";
+import { addSong } from "../Backend/playlist.ts";
 import { getPlaylists } from "../Backend/playlist.ts";
 import { formatPlaylists } from "../Backend/format.ts";
 import { header } from "../../services/ui.ts";
@@ -90,7 +90,7 @@ export async function drawSong(activeUser: string): Promise<void> {
     if(playlistName === null) return drawSong(activeUser);
 
     const title = await getTrackNameFromID(songId);
-    const result = await addToPlaylist(songId, playlistName, activeUser);
+    const result = await addSong(activeUser, playlistName, songId);
 
     if (result === "added") {
       console.log(`✔ "${title}" wurde zu "${playlistName}" hinzugefügt!\n`);

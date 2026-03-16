@@ -69,13 +69,22 @@ export async function addSong(
   username: string,
   playlistName: string,
   songId: string,
-) {
-  const res = await safeFetch(`${base()}/playlist/song/add`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, playlistName, songId }),
-  });
-  await res.body?.cancel(); // ok
+): Promise<"added" | "exists" | "error"> {
+  try {
+    const res = await safeFetch(`${base()}/playlist/song/add`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, playlistName, songId }),
+    });
+    if (!res.ok) {
+      await res.body?.cancel();
+      return "error";
+    }
+    const data = await res.json();
+    return data?.skipped ? "exists" : "added";
+  } catch {
+    return "error";
+  }
 }
 
 // 7) Song über Index löschen
