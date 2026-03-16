@@ -1,5 +1,5 @@
 import { header } from "../../services/ui.ts";
-import { ask, askChoice, askConfirm } from "../../services/prompt.ts";
+import { ask, askChoice, askConfirm, waitEnter } from "../../services/prompt.ts";
 import { formatPlaylists } from "../Backend/format.ts";
 import { getPlaylists } from "../Backend/playlist.ts";
 import { drawMenu } from "./menu.ts";
@@ -29,6 +29,7 @@ export async function drawAI(activeUser: string) {
     const playlistName = await ask("Wie soll die Playlist heißen?");
     const prompt = await ask("Bitte geben Sie einen Prompt ein:");
     await createAIPlaylist(activeUser, playlistName, prompt);
+    await waitEnter();
     return drawAI(activeUser);
   } else if (choice === "playlist") {
     const lists = await getPlaylists(activeUser);
@@ -49,12 +50,14 @@ export async function drawAI(activeUser: string) {
       const newPlaylistName = await ask("Wie soll die Playlist heißen?");
       await AIPlaylistFromPlaylist(activeUser, newPlaylistName, playlist);
     }
+    await waitEnter();
     return drawAI(activeUser);
   } else if (choice === "append") {
     const lists = await getPlaylists(activeUser);
 
     if (lists.length === 0) {
       console.log("Keine Playlists vorhanden.\n");
+      await waitEnter();
       return drawAI(activeUser);
     }
 
@@ -76,12 +79,14 @@ export async function drawAI(activeUser: string) {
 
     const prompt = await ask("Bitte geben Sie einen Prompt ein:");
     await addAISongsToPlaylist(activeUser, targetPlaylist, prompt);
+    await waitEnter();
     return drawAI(activeUser);
   } else if (choice === "analyze-append-same") {
     const lists = await getPlaylists(activeUser);
 
     if (lists.length === 0) {
       console.log("Keine Playlists vorhanden.\n");
+      await waitEnter();
       return drawAI(activeUser);
     }
 
@@ -102,6 +107,7 @@ export async function drawAI(activeUser: string) {
     }
 
     await addAIToSamePlaylistFromPlaylistAnalysis(activeUser, playlist);
+    await waitEnter();
     return drawAI(activeUser);
   } else return drawMenu(activeUser, true);
 }
