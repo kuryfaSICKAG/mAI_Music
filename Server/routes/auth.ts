@@ -20,17 +20,18 @@ authRouter.post("/auth/create", (req: Request, res: Response) => {
 
   const data = loadUsers();
   const exists = data.users.some((u: any) => u.username === username);
-
   if (exists) {
     return res.status(400).json({ error: "Benutzer existiert bereits!" });
   }
 
+  // TODO (sicher): password hashen (bcrypt) statt Klartext
   data.users.push({
     username,
     password,
     profile: defaultProfile(),
     favorites: [],
   });
+
   const session = createSession(username);
   data.authSessions.push({ ...session, username });
   saveUsers(data);
@@ -52,14 +53,10 @@ authRouter.post("/auth/login", (req: Request, res: Response) => {
   }
 
   const data = loadUsers();
-  const user = data.users.find(
-    (u: any) => u.username === username && u.password === password,
-  );
-
+  // TODO (sicher): bcrypt.compare statt Klartext-Vergleich
+  const user = data.users.find((u: any) => u.username === username && u.password === password);
   if (!user) {
-    return res
-      .status(401)
-      .json({ error: "Benutzername oder Passwort falsch!" });
+    return res.status(401).json({ error: "Benutzername oder Passwort falsch!" });
   }
 
   const session = createSession(username);
@@ -122,29 +119,27 @@ authRouter.get("/auth/me", (req: Request, res: Response) => {
   return res.json({ ok: true, user: toSafeUser(auth.user) });
 });
 
+/**
+ * Konsistenter File-DB-Check statt req.db
+ */
+authRouter.post("/auth/check", (req: Request, res: Response) => {
+  const username = String(req.body?.username ?? "").trim();
 
-authRouter.post("/auth/check", async (req: Request, res: Response) => {
-  const { username } = req.body;
-
-  // Validierung
-  if (!username || typeof username !== "string") {
+  if (!username) {
     return res.status(400).json({ error: "Ungültiger oder fehlender Benutzername." });
   }
 
   try {
-    // Beispiel: Datenbank-Abfrage
-    const user = await req.db.users.findOne({ username });
-
+    const data = loadUsers();
+    const user = data.users.find((u: any) => u.username === username);
     if (!user) {
       return res.status(404).json({ error: "User existiert nicht." });
     }
-
     return res.status(200).json({ username: user.username });
   } catch (err) {
     console.error("Fehler beim Usercheck:", err);
     return res.status(500).json({ error: "Serverfehler beim Usercheck." });
   }
 });
-
 
 export { authRouter };

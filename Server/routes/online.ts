@@ -1,7 +1,7 @@
 import { Router, type Request, type Response } from "express";
 import { loadPlaylists, savePlaylists } from "../Data/data.ts";
 import { saveSongs } from "../serverContext.ts";
-import type { Playlist, Status } from "../../models/personalModels.ts";
+import type { Playlist } from "../../models/personalModels.ts";
 
 const onlineRouter = Router();
 
@@ -34,19 +34,11 @@ onlineRouter.post("/sendPlaylist", (req: Request, res: Response) => {
 
     const targetName = playlistName; // kein Rename mehr
 
-    // Status sauber ableiten (Migration: altes public:boolean -> status)
-    const status: Status =
-      source?.status === "public" || source?.status === "private"
-        ? source.status
-        : (source as any)?.public === true
-          ? "public"
-          : "private";
-
-    // Nur gültiges Playlist-Objekt speichern (keine Zusatzfelder wie receivedFrom/receivedAt!)
+    // Empfangene Playlists sind immer private
     const transferred: Playlist = {
       name: targetName,
       songs: saveSongs(source.songs),
-      status,
+      status: "private",
     };
 
     db.playlistsByUser[toUser] = [...toArr, transferred];

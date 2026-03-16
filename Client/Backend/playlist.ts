@@ -31,13 +31,26 @@ export async function createPlaylist(
   username: string,
   name: string,
   status: Status = "private",
-) {
-  const res = await safeFetch(`${base()}/playlist/create`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, name, status }),
-  });
-  await res.body?.cancel(); // ok: Body wird nicht gelesen
+): Promise<"created" | "exists" | "error"> {
+  try {
+    const res = await safeFetch(`${base()}/playlist/create`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, name, status }),
+    });
+    if (res.status === 409) {
+      await res.body?.cancel();
+      return "exists";
+    }
+    if (!res.ok) {
+      await res.body?.cancel();
+      return "error";
+    }
+    await res.body?.cancel();
+    return "created";
+  } catch {
+    return "error";
+  }
 }
 
 // 4) Playlist löschen
@@ -69,13 +82,22 @@ export async function addSong(
   username: string,
   playlistName: string,
   songId: string,
-) {
-  const res = await safeFetch(`${base()}/playlist/song/add`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, playlistName, songId }),
-  });
-  await res.body?.cancel(); // ok
+): Promise<"added" | "exists" | "error"> {
+  try {
+    const res = await safeFetch(`${base()}/playlist/song/add`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, playlistName, songId }),
+    });
+    if (!res.ok) {
+      await res.body?.cancel();
+      return "error";
+    }
+    const data = await res.json();
+    return data?.skipped ? "exists" : "added";
+  } catch {
+    return "error";
+  }
 }
 
 // 7) Song über Index löschen

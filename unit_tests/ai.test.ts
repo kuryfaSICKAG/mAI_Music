@@ -3,7 +3,12 @@ import { promises as fs } from "fs";
 import { OpenAI } from "openai";
 import * as deezerModule from "../apiServices/deezerAPI/deezer.ts";
 import * as promptModule from "../services/prompt.ts";
-import { clearSearchedSongs, createAIPlaylist } from "../services/service.ts";
+import {
+  clearSearchedSongs,
+  createAIPlaylist,
+  addAISongsToPlaylist,
+  addAIToSamePlaylistFromPlaylistAnalysis,
+} from "../services/service.ts";
 
 vi.mock("fs", () => ({
   promises: {
@@ -125,6 +130,115 @@ describe("AI Playlist Component", () => {
 
     expect(parsed.playlistsByUser.testuser).toHaveLength(1);
     expect(parsed.playlistsByUser.testuser[0].name).toBe("AI Mix");
+    expect(parsed.playlistsByUser.testuser[0].songs).toEqual(["111", "222"]);
+  });
+
+  it("adds only new AI songs to an existing playlist", async () => {
+    readFileMock.mockResolvedValueOnce(
+      JSON.stringify({
+        playlistsByUser: {
+          testuser: [{ name: "Existing", songs: ["111"], status: "private" }],
+        },
+      }),
+    );
+
+    const result = await addAISongsToPlaylist("testuser", "Existing", "focus");
+
+    expect(result).toBe(true);
+    expect(writeFileMock).toHaveBeenCalledTimes(1);
+
+    const writePayload = writeFileMock.mock.calls[0]?.[1] as string;
+    const parsed = JSON.parse(writePayload);
+
+    expect(parsed.playlistsByUser.testuser[0].songs).toEqual(["111", "222"]);
+  });
+
+  it("returns false when no distinct songs can be added", async () => {
+    OpenAIMock.mockImplementationOnce(() => ({
+      chat: {
+        completions: {
+          create: vi.fn().mockResolvedValue({
+            choices: [{ message: { content: "1. Song A - Artist A" } }],
+          }),
+        },
+      },
+    }));
+
+    readFileMock.mockResolvedValueOnce(
+      JSON.stringify({
+        playlistsByUser: {
+          testuser: [{ name: "Existing", songs: ["111"], status: "private" }],
+        },
+      }),
+    );
+
+    const result = await addAISongsToPlaylist("testuser", "Existing", "focus");
+
+    expect(result).toBe(false);
+    expect(writeFileMock).not.toHaveBeenCalled();
+  });
+
+  it("analyzes playlist and appends AI songs to the same playlist", async () => {
+    OpenAIMock.mockImplementationOnce(() => ({
+      chat: {
+        completions: {
+          create: vi.fn().mockResolvedValue({
+            choices: [
+              {
+                message: {
+                  content:
+                    '{"prompt":"mehr songs wie diese","languageHint":"englisch","referenceArtists":["Artist A"]}',
+                },
+              },
+            ],
+          }),
+        },
+      },
+    }));
+
+    OpenAIMock.mockImplementationOnce(() => ({
+      chat: {
+        completions: {
+          create: vi.fn().mockResolvedValue({
+            choices: [
+              {
+                message: {
+                  content: "1. Song B - Artist B",
+                },
+              },
+            ],
+          }),
+        },
+      },
+    }));
+
+    readFileMock.mockResolvedValueOnce(
+      JSON.stringify({
+        playlistsByUser: {
+          testuser: [{ name: "Existing", songs: ["111"], status: "private" }],
+        },
+      }),
+    );
+
+    readFileMock.mockResolvedValueOnce(
+      JSON.stringify({
+        playlistsByUser: {
+          testuser: [{ name: "Existing", songs: ["111"], status: "private" }],
+        },
+      }),
+    );
+
+    const result = await addAIToSamePlaylistFromPlaylistAnalysis(
+      "testuser",
+      "Existing",
+    );
+
+    expect(result).toBe(true);
+    expect(writeFileMock).toHaveBeenCalledTimes(1);
+
+    const writePayload = writeFileMock.mock.calls[0]?.[1] as string;
+    const parsed = JSON.parse(writePayload);
+
     expect(parsed.playlistsByUser.testuser[0].songs).toEqual(["111", "222"]);
   });
 });

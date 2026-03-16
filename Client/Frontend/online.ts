@@ -48,7 +48,7 @@ export async function drawOnline(activeUser: string) {
     if (selected === null) {
       console.log("Auswahl abgebrochen.");
       await waitEnter();
-      return;
+      return drawOnline(activeUser);
     }
 
     const goalUser = await ask("An welchen Benutzer senden?");
