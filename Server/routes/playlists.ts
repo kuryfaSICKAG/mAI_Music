@@ -267,7 +267,9 @@ playlistsRouter.get(
   (req: Request, res: Response) => {
     const username = resolveUserFromReq(req);
     if (!username) return res.status(401).json({ error: "Unauthorized" });
-    const { playlistName } = req.params;
+    const playlistName = String(req.params.playlistName ?? "").trim();
+    if (!playlistName)
+      return res.status(400).json({ error: "playlistName fehlt" });
     const status = getPlaylistStatusServer(username, playlistName);
     if (!status)
       return res.status(404).json({ error: "Playlist nicht gefunden" });
@@ -280,7 +282,9 @@ playlistsRouter.patch(
   (req: Request, res: Response) => {
     const username = resolveUserFromReq(req);
     if (!username) return res.status(401).json({ error: "Unauthorized" });
-    const { playlistName } = req.params;
+    const playlistName = String(req.params.playlistName ?? "").trim();
+    if (!playlistName)
+      return res.status(400).json({ error: "playlistName fehlt" });
     const { status } = req.body as { status?: Status };
     if (status !== "public" && status !== "private") {
       return res
@@ -298,7 +302,9 @@ playlistsRouter.post(
   (req: Request, res: Response) => {
     const username = resolveUserFromReq(req);
     if (!username) return res.status(401).json({ error: "Unauthorized" });
-    const { playlistName } = req.params;
+    const playlistName = String(req.params.playlistName ?? "").trim();
+    if (!playlistName)
+      return res.status(400).json({ error: "playlistName fehlt" });
     const next = togglePlaylistStatusServer(username, playlistName);
     if (!next)
       return res.status(404).json({ error: "Playlist nicht gefunden" });

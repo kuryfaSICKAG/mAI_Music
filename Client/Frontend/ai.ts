@@ -2,7 +2,6 @@ import { header } from "../../services/ui.ts";
 import {
   ask,
   askChoice,
-  askConfirm,
   waitEnter,
 } from "../../services/prompt.ts";
 import { formatPlaylists } from "../Backend/format.ts";
@@ -12,7 +11,7 @@ import {
   AIPlaylistFromPlaylist,
   addAISongsToPlaylist,
   addAIToSamePlaylistFromPlaylistAnalysis,
-} from "../Backend/ai.ts";
+} from "../../services/aiService.ts";
 import { drawMenu } from "./menu.ts";
 
 export async function drawAI(activeUser: string) {

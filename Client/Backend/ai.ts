@@ -11,7 +11,7 @@ async function readErrorMessage(res: Response): Promise<string> {
     const data = await res.json();
     return String(data?.error || data?.detail || `HTTP ${res.status}`);
   } catch {
-    await res.body?.cancel();
+    // res.json() may already have consumed/locked the stream; avoid cancel() here.
     return `HTTP ${res.status}`;
   }
 }
