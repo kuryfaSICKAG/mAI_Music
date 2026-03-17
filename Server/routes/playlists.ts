@@ -7,12 +7,6 @@ import {
   saveSongs,
 } from "../serverContext.ts";
 import { searchDeezer } from "../services/deezerSearch.ts";
-import {
-  createAIPlaylist,
-  AIPlaylistFromPlaylist,
-  addAISongsToPlaylist,
-  addAIToSamePlaylistFromPlaylistAnalysis,
-} from "../../services/service.ts";
 import type { Status } from "../../models/personalModels.ts";
 import {
   getPlaylistStatusServer,
@@ -371,77 +365,5 @@ playlistsRouter.get(
     return res.json({ username, playlist: { ...playlist, status } });
   },
 );
-
-playlistsRouter.post("/playlist/ai/create", async (req: Request, res: Response) => {
-  try {
-    const { username, playlistName, mood } = req.body;
-
-    if (!username || !playlistName || !mood) {
-      return res
-        .status(400)
-        .json({ error: "username, playlistName oder mood fehlt" });
-    }
-
-      const success = await createAIPlaylist(username, playlistName, mood);
-
-      if (success) {
-        // Lade die neu erstellte Playlist
-        const { playlist } = findPlaylist(username, playlistName);
-        return res.status(201).json({
-          ok: true,
-          message: `Playlist "${playlistName}" wurde erfolgreich mit KI erstellt!`,
-          playlist,
-        });
-      } else {
-        return res.status(400).json({
-          ok: false,
-          error: "Playlist konnte nicht analysiert oder erweitert werden.",
-        });
-      }
-
-      return res.status(200).json({ ok: true });
-    } catch (error: any) {
-      return res.status(500).json({
-        error: "AI Analyse und Ergaenzung fehlgeschlagen",
-        detail: error?.message ?? "Unbekannter Fehler",
-      });
-    }
-  },
-);
-
-playlistsRouter.post("/playlist/create-ai", async (req: Request, res: Response) => {
-  try {
-    const { username, playlistName, mood } = req.body;
-
-    if (!username || !playlistName || !mood) {
-      return res
-        .status(400)
-        .json({ error: "username, playlistName oder mood fehlt" });
-    }
-
-    const success = await createAIPlaylist(username, playlistName, mood, undefined, {
-      skipConfirmation: true,
-    });
-
-    if (!success) {
-      return res.status(400).json({
-        ok: false,
-        error: "Playlist konnte nicht erstellt werden.",
-      });
-    }
-
-    const { playlist } = findPlaylist(username, playlistName);
-    return res.status(201).json({
-      ok: true,
-      message: `Playlist "${playlistName}" wurde erfolgreich mit KI erstellt!`,
-      playlist,
-    });
-  } catch (error: any) {
-    return res.status(500).json({
-      error: "AI Playlist erstellen fehlgeschlagen",
-      detail: error?.message ?? "Unbekannter Fehler",
-    });
-  }
-});
 
 export { playlistsRouter };
