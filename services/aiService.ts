@@ -24,6 +24,10 @@ type PlaylistProfile = {
   referenceArtists: string[];
 };
 
+type AIExecutionOptions = {
+  skipConfirmation?: boolean;
+};
+
 function normalizeForMatch(s: string): string {
   return s
     .toLowerCase()
@@ -516,6 +520,7 @@ export async function createAIPlaylist(
   playlistName: string,
   mood: string,
   constraints?: PlaylistGenerationConstraints,
+  options?: AIExecutionOptions,
 ): Promise<boolean> {
   try {
     const requestedArtists = extractArtistNamesFromRequest(mood);
@@ -545,14 +550,16 @@ export async function createAIPlaylist(
       console.log(`${idx + 1}. ${song.title} - ${song.artist}`);
     });
 
-    console.log("\n");
-    const confirm = await ask(
-      `Soll die Playlist "${playlistName}" zum Account "${username}" hinzugefügt werden? (y/n): `,
-    );
+    if (options?.skipConfirmation !== true) {
+      console.log("\n");
+      const confirm = await ask(
+        `Soll die Playlist "${playlistName}" zum Account "${username}" hinzugefügt werden? (y/n): `,
+      );
 
-    if (confirm.toLowerCase() !== "y") {
-      console.log("Playlist wurde nicht erstellt.");
-      return false;
+      if (confirm.toLowerCase() !== "y") {
+        console.log("Playlist wurde nicht erstellt.");
+        return false;
+      }
     }
 
     console.log("\n💾 Erstelle Playlist und füge Songs hinzu...");
@@ -587,6 +594,7 @@ export async function AIPlaylistFromPlaylist(
   username: string,
   newPlaylistName: string,
   basePlaylistName: string,
+  options?: AIExecutionOptions,
 ): Promise<boolean> {
   try {
     const userPlaylists = await getPlaylists(username);
@@ -656,7 +664,7 @@ export async function AIPlaylistFromPlaylist(
       languageHint: profile.languageHint,
       referenceArtists: profile.referenceArtists,
       referenceSongs: sourceSongs,
-    });
+    }, options);
   } catch (err: any) {
     console.error("Fehler in AIPlaylistFromPlaylist:", err?.message || err);
     return false;
@@ -666,6 +674,7 @@ export async function AIPlaylistFromPlaylist(
 export async function addAIToSamePlaylistFromPlaylistAnalysis(
   username: string,
   playlistName: string,
+  options?: AIExecutionOptions,
 ): Promise<boolean> {
   try {
     const userPlaylists = await getPlaylists(username);
@@ -729,7 +738,7 @@ export async function addAIToSamePlaylistFromPlaylistAnalysis(
       languageHint: profile.languageHint,
       referenceArtists: profile.referenceArtists,
       referenceSongs: sourceSongs,
-    });
+    }, options);
   } catch (err: any) {
     console.error(
       "Fehler in addAIToSamePlaylistFromPlaylistAnalysis:",
@@ -744,6 +753,7 @@ export async function addAISongsToPlaylist(
   targetPlaylistName: string,
   mood: string,
   constraints?: PlaylistGenerationConstraints,
+  options?: AIExecutionOptions,
 ): Promise<boolean> {
   try {
     const requestedArtists = extractArtistNamesFromRequest(mood);
@@ -807,14 +817,16 @@ export async function addAISongsToPlaylist(
       );
     }
 
-    console.log("\n");
-    const confirm = await ask(
-      `Soll(en) ${songsToAdd.length} Song(s) zur Playlist "${targetPlaylistName}" hinzugefuegt werden? (y/n): `,
-    );
+    if (options?.skipConfirmation !== true) {
+      console.log("\n");
+      const confirm = await ask(
+        `Soll(en) ${songsToAdd.length} Song(s) zur Playlist "${targetPlaylistName}" hinzugefuegt werden? (y/n): `,
+      );
 
-    if (confirm.toLowerCase() !== "y") {
-      console.log("Songs wurden nicht hinzugefuegt.");
-      return false;
+      if (confirm.toLowerCase() !== "y") {
+        console.log("Songs wurden nicht hinzugefuegt.");
+        return false;
+      }
     }
 
     for (const song of songsToAdd) {

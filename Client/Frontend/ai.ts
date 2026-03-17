@@ -7,13 +7,13 @@ import {
 } from "../../services/prompt.ts";
 import { formatPlaylists } from "../Backend/format.ts";
 import { getPlaylists } from "../Backend/playlist.ts";
-import { drawMenu } from "./menu.ts";
 import {
   createAIPlaylist,
   AIPlaylistFromPlaylist,
   addAISongsToPlaylist,
   addAIToSamePlaylistFromPlaylistAnalysis,
-} from "../../services/aiService.ts";
+} from "../Backend/ai.ts";
+import { drawMenu } from "./menu.ts";
 
 export async function drawAI(activeUser: string) {
   console.clear();
