@@ -1,5 +1,5 @@
 import { askConnection } from "./Client/Frontend/connect.ts";
 
-//clear whole console
+// Leert die Konsole vor dem Start fuer eine saubere Ausgabe.
 process.stdout.write("\x1bc");
 askConnection();

@@ -8,10 +8,10 @@ import {
 } from "../services/service.ts";
 import { DeezerAPI } from "../apiServices/deezerAPI/deezer.ts";
 
-// Mock DeezerAPI
+// Mockt die DeezerAPI, um externe Requests im Test zu vermeiden.
 vi.mock("../apiServices/deezerAPI/deezer");
 
-// Mock readline-sync (if needed)
+// Mockt readline-sync fuer potenzielle Prompt-Aufrufe im Testkontext.
 vi.mock("readline-sync", () => ({
   question: vi.fn(),
   questionInt: vi.fn(),
@@ -41,7 +41,7 @@ describe("Service Module", () => {
     });
 
     it("clearSearchedSongs should empty the searched songs array", () => {
-      // Manually add some songs to the array
+      // Befuellt den Suchspeicher testweise vor dem Zuruecksetzen.
       (searchedSongs as any).push("song1", "song2");
       expect(getSearchedSongs().length).toBe(2);
 
@@ -113,13 +113,13 @@ describe("Service Module", () => {
 
       deezerMock.mockImplementation(() => mockInstance);
 
-      // Simulate previous search
+      // Simuliert einen bereits vorhandenen Suchzustand.
       (searchedSongs as any).push("old-id-1", "old-id-2");
       expect(getSearchedSongs().length).toBe(2);
 
       await searchSong("new");
 
-      // After new search, old IDs should be cleared
+      // Nach einer neuen Suche duerfen alte IDs nicht mehr vorhanden sein.
       const result = getSearchedSongs();
       expect(result).not.toContain("old-id-1");
       expect(result).toContain("999");
@@ -166,7 +166,7 @@ describe("Service Module", () => {
           {
             id: "123",
             title_short: "Short Title",
-            // Missing other properties
+            // Simuliert unvollstaendige Track-Daten aus der API.
           },
           {
             id: "124",
@@ -352,7 +352,7 @@ describe("Service Module", () => {
 
       const result = await searchSong("test");
 
-      expect(result.length).toBe(25); // Limited to 25
+      expect(result.length).toBe(25); // Die Ausgabe ist bewusst auf 25 Treffer begrenzt.
     });
   });
 });

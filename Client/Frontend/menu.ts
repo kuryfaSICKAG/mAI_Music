@@ -17,7 +17,7 @@ export async function drawMenu(
 ): Promise<void> {
   if (!loggedIn) {
     const spinner = ora(`Du wirst eingeloggt als "${activeUser}"...`).start();
-    await sleep(1500); // deine künstliche Wartezeit
+    await sleep(1500); // Kurze Verzoegerung fuer eine ruhige UI-Uebergangsanimation.
     spinner.succeed("Fertig!");
   }
 

@@ -245,7 +245,7 @@ async function findBestDeezerMatch(
       const res = await api.searchTrackPrecise(searchTitle, searchArtist);
       if (res.data?.length > 0) addCandidates(res.data.slice(0, 15));
     } catch {
-      // continue with fallback search
+      // Bei Fehlern wird auf die naechste, allgemeinere Suchstrategie gewechselt.
     }
   }
 
@@ -257,7 +257,7 @@ async function findBestDeezerMatch(
       const res = await api.searchPlain(query);
       if (res.data?.length > 0) addCandidates(res.data.slice(0, 15));
     } catch {
-      // continue with title-only fallback
+      // Bei Fehlern wird abschliessend eine reine Titelsuche versucht.
     }
   }
 
@@ -630,7 +630,7 @@ export async function AIPlaylistFromPlaylist(
           sourceSongs.push(`${title} - ${artist}`);
         }
       } catch {
-        // einzelne fehlerhafte IDs überspringen
+        // Ueberspringt einzelne fehlerhafte Song-IDs, ohne den Gesamtprozess abzubrechen.
       }
     }
 
@@ -705,7 +705,7 @@ export async function addAIToSamePlaylistFromPlaylistAnalysis(
           sourceSongs.push(`${title} - ${artist}`);
         }
       } catch {
-        // einzelne fehlerhafte IDs ueberspringen
+        // Ueberspringt einzelne fehlerhafte Song-IDs, ohne den Gesamtprozess abzubrechen.
       }
     }
 

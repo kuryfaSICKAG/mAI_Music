@@ -1,24 +1,24 @@
-// Returns an array of all user objects from the user data file
+// Datenzugriffsschicht fuer Benutzer- und Playlistdaten.
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
-// 👉 Typen aus personalModels importieren
+// Verwendet zentrale Typdefinitionen aus dem Modellmodul.
 import type {
   DB as PlaylistsDB,
   Playlist as PMPlaylist,
   Status,
 } from "../../models/personalModels.ts";
 
-// ESM Ersatz für __dirname
+// ESM-kompatibler Ersatz fuer __dirname.
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Dateien im selben Ordner wie data.ts
+// Daten-Dateien liegen im selben Ordner wie diese Datei.
 const userFile = path.join(__dirname, "user_Data.json");
 const playlistFile = path.join(__dirname, "playlist_data.json");
 
-// Datei/Ordner sicherstellen
+// Stellt sicher, dass Zielordner und Datei existieren.
 function ensureFile(filePath: string, defaultData: object) {
   const dir = path.dirname(filePath);
 
@@ -31,18 +31,18 @@ function ensureFile(filePath: string, defaultData: object) {
   }
 }
 
-// JSON Loader
+// Laedt JSON aus einer Datei und erstellt bei Bedarf eine Default-Datei.
 export function loadJSON<T = any>(filePath: string): T {
-  ensureFile(filePath, {}); // leeres Objekt, falls Datei fehlt
+  ensureFile(filePath, {}); // Erstellt eine leere JSON-Struktur, falls die Datei fehlt.
   return JSON.parse(fs.readFileSync(filePath, "utf8")) as T;
 }
 
-// JSON Saver
+// Schreibt ein Objekt formatiert als JSON in eine Datei.
 export function saveJSON(filePath: string, data: any) {
   fs.writeFileSync(filePath, JSON.stringify(data, null, 4), "utf8");
 }
 
-// ==================== USERS ====================
+// -------------------- Benutzerdaten --------------------
 export type UserProfile = {
   favoriteGenres: string[];
   locale: string;
@@ -140,12 +140,12 @@ export function saveUsers(data: UsersDB) {
   saveJSON(userFile, data);
 }
 
-// ==================== PLAYLISTS (playlistsByUser) ====================
+// -------------------- Playlistdaten (playlistsByUser) --------------------
 
-// Lokale Typen ENTFERNT – wir nutzen die aus personalModels.
-// Zusätzlich normalisieren wir beim Laden auf `status`.
+// Lokale Duplikat-Typen werden vermieden; es gelten die zentralen Modelltypen.
+// Beim Laden werden Altformate auf das Feld `status` normalisiert.
 
-// Hilfsfunktion: robustes Normalisieren einer Playlist (inkl. Migration von `public` -> `status`)
+// Normalisiert eingelesene Playlists inklusive Migration von `public` nach `status`.
 function normalizePlaylist(p: any): PMPlaylist {
   const name = typeof p?.name === "string" ? p.name : "Unbenannt";
 
@@ -192,7 +192,7 @@ export function loadPlaylists(): PlaylistsDB {
   }
 
   const db: PlaylistsDB = { playlistsByUser };
-  // Rückschreiben, um altes Schema (mit `public`) zu bereinigen
+  // Schreibt normalisierte Daten zurueck, um alte Schemata dauerhaft zu bereinigen.
   savePlaylists(db);
   return db;
 }

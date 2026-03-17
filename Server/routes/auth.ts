@@ -24,7 +24,7 @@ authRouter.post("/auth/create", (req: Request, res: Response) => {
     return res.status(400).json({ error: "Benutzer existiert bereits!" });
   }
 
-  // TODO (sicher): password hashen (bcrypt) statt Klartext
+  // TODO (Sicherheit): Passwort vor dem Speichern mit bcrypt hashen statt im Klartext abzulegen.
   data.users.push({
     username,
     password,
@@ -53,7 +53,7 @@ authRouter.post("/auth/login", (req: Request, res: Response) => {
   }
 
   const data = loadUsers();
-  // TODO (sicher): bcrypt.compare statt Klartext-Vergleich
+  // TODO (Sicherheit): Passwortpruefung mit bcrypt.compare statt Klartextvergleich umsetzen.
   const user = data.users.find(
     (u: any) => u.username === username && u.password === password,
   );
@@ -124,7 +124,7 @@ authRouter.get("/auth/me", (req: Request, res: Response) => {
 });
 
 /**
- * Konsistenter File-DB-Check statt req.db
+ * Prueft Benutzer konsistent ueber die Datei-basierte Datenquelle statt ueber `req.db`.
  */
 authRouter.post("/auth/check", (req: Request, res: Response) => {
   const username = String(req.body?.username ?? "").trim();

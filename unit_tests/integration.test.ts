@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
 /**
- * Integration Tests - Endpoint Testing
- * Tests für HTTP-Endpoints und API-Routen
+ * Integrationstests fuer Endpunkte.
+ * Deckt zentrale HTTP-Routen und API-Verhalten ab.
  */
 
 describe("API Integration Tests", () => {
@@ -34,7 +34,7 @@ describe("API Integration Tests", () => {
 
     it("should set token expiration", () => {
       const createdAt = Date.now();
-      const ttlMs = 1000 * 60 * 60 * 24 * 7; // 7 days
+      const ttlMs = 1000 * 60 * 60 * 24 * 7; // Entspricht sieben Tagen.
       const expiresAt = createdAt + ttlMs;
 
       expect(expiresAt).toBeGreaterThan(createdAt);
@@ -44,7 +44,7 @@ describe("API Integration Tests", () => {
 
   describe("Playlist Endpoints", () => {
     beforeEach(() => {
-      // Mock response object
+      // Setzt den Mock-Zustand vor jedem Testfall zurueck.
       vi.clearAllMocks();
     });
 

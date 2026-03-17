@@ -90,7 +90,7 @@ describe("Server Context", () => {
       const expiresAt = new Date(session.expiresAt).getTime();
       const expectedExpiry = beforeTime + SESSION_TTL_MS;
 
-      // Allow 1 second margin for test execution
+      // Erlaubt eine Toleranz von einer Sekunde fuer Laufzeitabweichungen im Test.
       expect(expiresAt).toBeGreaterThanOrEqual(expectedExpiry - 1000);
       expect(expiresAt).toBeLessThanOrEqual(afterTime + SESSION_TTL_MS + 1000);
     });
@@ -100,7 +100,7 @@ describe("Server Context", () => {
 
       expect(new Date(session.createdAt)).toBeInstanceOf(Date);
       expect(new Date(session.expiresAt)).toBeInstanceOf(Date);
-      // Verify ISO format
+      // Prueft das erwartete ISO-Zeitformat.
       expect(session.createdAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
       expect(session.expiresAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
     });
@@ -197,8 +197,8 @@ describe("Server Context", () => {
     });
 
     it("getPlaylistStatusServer should return status for valid playlist", () => {
-      // This test would require mocking loadPlaylists
-      // Skipping actual implementation testing due to file I/O
+      // Dieser Testfall wuerde ein gezieltes Mocking von `loadPlaylists` erfordern.
+      // Die konkrete Implementierungspruefung wird hier wegen Dateizugriffen bewusst ausgelassen.
       expect(true).toBe(true);
     });
   });

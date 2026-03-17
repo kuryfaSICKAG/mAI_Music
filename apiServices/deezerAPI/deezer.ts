@@ -15,7 +15,7 @@ export class DeezerAPI {
     return JSON.parse(text) as T;
   }
 
-  // --- Artist search ---
+  // Sucht nach Kuenstlern anhand eines Namens.
   searchArtist(name: string) {
     return this.get<{ data: any[] }>(
       `search/artist?q=${encodeURIComponent(name)}`
@@ -28,7 +28,7 @@ export class DeezerAPI {
     );
   }
 
-  // --- Album search ---
+  // Sucht nach Alben anhand eines Namens.
   searchAlbum(name: string) {
     return this.get<{ data: any[] }>(
       `search/album?q=${encodeURIComponent(name)}`
@@ -39,15 +39,15 @@ export class DeezerAPI {
     return this.get<any>(`album/${encodeURIComponent(id)}`);
   }
 
-  // --- Track search ---
+  // Sucht nach Tracks anhand des Titels.
   searchTrack(title: string) {
-    // Deezer supports track-only search!
+    // Nutzt eine track-spezifische Deezer-Suche fuer praezisere Treffer.
     return this.get<{ data: any[] }>(
       `search?q=track:"${encodeURIComponent(title)}"`
     );
   }
 
-  /** Präzisere Suche mit Titel UND Interpret für deterministisches Matching */
+  /** Fuehrt eine praezise Suche mit Titel und Interpret fuer stabilere Treffer durch. */
   searchTrackPrecise(title: string, artist: string) {
     const query = `artist:"${artist}" track:"${title}"`;
     return this.get<{ data: any[] }>(
@@ -55,7 +55,7 @@ export class DeezerAPI {
     );
   }
 
-  /** Allgemeine Freitextsuche ohne Feldqualifikatoren */
+  /** Fuehrt eine allgemeine Freitextsuche ohne Feldqualifikatoren aus. */
   searchPlain(query: string) {
     return this.get<{ data: any[] }>(
       `search?q=${encodeURIComponent(query)}`

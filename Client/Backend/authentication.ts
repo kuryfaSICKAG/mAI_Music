@@ -1,13 +1,9 @@
-// Client/Backend/authentication.ts
-// ============================================================
-// Dieses Modul führt ausschließlich Server-Requests aus.
-// Keine UI, kein activeUser, keine zusätzlichen Features.
-// ============================================================
+// Authentifizierungsmodul: kapselt ausschliesslich Serveranfragen fuer Login und Registrierung.
 
 import { getServerUrl } from "./connection.ts";
 
 /**
- * Hilfsfunktion: JSON sicher parsen
+ * Parst JSON robust und liefert bei ungueltigem Inhalt `null`.
  */
 async function parseJsonSafe(res: Response): Promise<any | null> {
   const text = await res.text();
@@ -19,12 +15,8 @@ async function parseJsonSafe(res: Response): Promise<any | null> {
 }
 
 /**
- * USER REGISTRIEREN
- * ------------------------------
- * Erfolgreich:
- *   { ok: true, username: "..." }
- * Fehler:
- *   { ok: false, error: "..." }
+ * Registriert einen neuen Benutzer.
+ * Rueckgabe: `{ ok: true, username }` bei Erfolg, sonst `{ ok: false, error }`.
  */
 export async function createUser(
   username: string,
@@ -62,12 +54,8 @@ export async function createUser(
 }
 
 /**
- * USER LOGIN
- * ------------------------------
- * Erfolgreich:
- *   { ok: true, username: "..." }
- * Fehler:
- *   { ok: false, error: "..." }
+ * Prueft Benutzername und Passwort beim Login.
+ * Rueckgabe: `{ ok: true, username }` bei Erfolg, sonst `{ ok: false, error }`.
  */
 export async function validateUser(
   username: string,

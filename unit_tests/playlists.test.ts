@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { Request, Response } from "express";
 
-// Mock the data module
+// Mockt das Datenmodul, damit die Tests ohne Dateisystemzugriff laufen.
 vi.mock("../Server/Data/data");
 
 type PlaylistStatus = "private" | "public";
@@ -17,7 +17,7 @@ type PlaylistDB = {
   };
 };
 
-// Test data for playlist operations
+// Referenzdaten fuer Playlist-bezogene Testszenarien.
 const mockPlaylistDB: PlaylistDB = {
   playlistsByUser: {
     testuser: [
@@ -90,7 +90,7 @@ describe("Playlist Routes", () => {
     it("should reject duplicate playlist names for same user", () => {
       const db = mockPlaylistDB;
       const user = "testuser";
-      const newName = "Favorites"; // Already exists
+      const newName = "Favorites"; // Der Name existiert beim Benutzer bereits.
 
       const isDuplicate = db.playlistsByUser[user]?.some(
         (p) => p.name === newName,
@@ -109,7 +109,7 @@ describe("Playlist Routes", () => {
       }
 
       db.playlistsByUser[user2].push({
-        name: "Favorites", // Same name as user1's playlist
+        name: "Favorites", // Gleicher Name ist bei unterschiedlichen Benutzern erlaubt.
         status: "private",
         songs: [],
       });
@@ -174,7 +174,7 @@ describe("Playlist Routes", () => {
 
   describe("Playlist Rename", () => {
     it("should rename a playlist", () => {
-      // Create a fresh test playlist
+      // Erstellt ein frisches Objekt, damit kein Zustand zwischen Tests geteilt wird.
       let playlist = {
         name: "Favorites",
         status: "private" as const,
@@ -183,10 +183,10 @@ describe("Playlist Routes", () => {
       const oldName = "Favorites";
       const newName = "My Favorites";
 
-      // Rename the playlist
+      // Simuliert die Umbenennung.
       playlist.name = newName;
 
-      // Verify rename was successful
+      // Prueft, dass die Umbenennung korrekt uebernommen wurde.
       expect(playlist.name).toBe("My Favorites");
       expect(playlist.name).not.toBe(oldName);
     });
@@ -263,7 +263,7 @@ describe("Playlist Routes", () => {
         songs: ["song1"],
       };
 
-      playlist.songs.push("song1"); // Add duplicate
+      playlist.songs.push("song1"); // Fuegt absichtlich ein Duplikat hinzu.
 
       expect(playlist.songs.length).toBe(2);
       expect(playlist.songs.filter((s) => s === "song1").length).toBe(2);
@@ -291,10 +291,10 @@ describe("Playlist Routes", () => {
         songs: ["song1", "song2", "song3"],
       };
 
-      // Move song3 to index 0
-      const song = playlist.songs.splice(2, 1)[0]; // Remove from end
+      // Verschiebt den letzten Song an den Anfang der Liste.
+      const song = playlist.songs.splice(2, 1)[0]; // Entfernt den Song vom Listenende.
       if (song !== undefined) {
-        playlist.songs.unshift(song); // Add to beginning
+        playlist.songs.unshift(song); // Fuegt den Song am Listenanfang ein.
       }
 
       expect(playlist.songs).toEqual(["song3", "song1", "song2"]);
