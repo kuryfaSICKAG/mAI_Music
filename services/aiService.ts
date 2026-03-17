@@ -1,11 +1,7 @@
 import { DeezerAPI } from "../apiServices/deezerAPI/deezer.ts";
 import { ask } from "./prompt.ts";
 import { OpenAI } from "openai";
-import {
-	getPlaylists,
-	createPlaylist,
-	addSong,
-} from "../Client/Backend/playlist.ts";
+import { getPlaylists, createPlaylist, addSong, } from "../Client/Backend/playlist.ts";
 import dotenv from "dotenv";
 
 dotenv.config();
