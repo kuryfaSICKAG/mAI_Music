@@ -7,26 +7,26 @@ function base() {
   return url;
 }
 
-// Initialisiert den Benutzer im Playlist-System auf dem Server.
+// 1) User für Playlist-System initialisieren
 export async function initUser(username: string) {
   const res = await safeFetch(`${base()}/playlist/init`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username }),
   });
-  await res.body?.cancel(); // Der Response-Body wird nicht benoetigt und daher aktiv freigegeben.
+  await res.body?.cancel(); // ok: Body wird nicht gelesen
 }
 
-// Laedt alle Playlists eines Benutzers.
+// 2) Alle Playlists eines Users abrufen
 export async function getPlaylists(username: string): Promise<Playlist[]> {
   const res = await safeFetch(
     `${base()}/playlist/${encodeURIComponent(username)}`,
   );
-  // Der Body wird per `json()` gelesen; ein zusaetzliches `cancel()` ist dann unnoetig.
+  // Body wird gelesen -> KEIN cancel() danach!
   return res.ok ? await res.json() : [];
 }
 
-// Erstellt eine neue Playlist mit optionalem Sichtbarkeitsstatus.
+// 3) Playlist erstellen
 export async function createPlaylist(
   username: string,
   name: string,
@@ -53,17 +53,17 @@ export async function createPlaylist(
   }
 }
 
-// Loescht eine bestehende Playlist.
+// 4) Playlist löschen
 export async function deletePlaylist(username: string, name: string) {
   const res = await safeFetch(`${base()}/playlist/delete`, {
     method: "DELETE",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, name }),
   });
-  await res.body?.cancel(); // Der Response-Body wird nicht benoetigt und daher aktiv freigegeben.
+  await res.body?.cancel(); // ok
 }
 
-// Benennt eine Playlist um.
+// 5) Playlist umbenennen
 export async function renamePlaylist(
   username: string,
   oldName: string,
@@ -74,10 +74,10 @@ export async function renamePlaylist(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, oldName, newName }),
   });
-  await res.body?.cancel(); // Der Response-Body wird nicht benoetigt und daher aktiv freigegeben.
+  await res.body?.cancel(); // ok
 }
 
-// Fuegt einen Song zur angegebenen Playlist hinzu.
+// 6) Song hinzufügen
 export async function addSong(
   username: string,
   playlistName: string,
@@ -100,7 +100,7 @@ export async function addSong(
   }
 }
 
-// Entfernt einen Song anhand seines Index aus der Playlist.
+// 7) Song über Index löschen
 export async function removeSongByIndex(
   username: string,
   playlistName: string,
@@ -111,10 +111,10 @@ export async function removeSongByIndex(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, playlistName, index }),
   });
-  await res.body?.cancel(); // Der Response-Body wird nicht benoetigt und daher aktiv freigegeben.
+  await res.body?.cancel(); // ok
 }
 
-// Liest den aktuellen Sichtbarkeitsstatus einer Playlist.
+// 8) Status abfragen
 export async function getPlaylistStatus(
   username: string,
   playlistName: string,
@@ -125,11 +125,11 @@ export async function getPlaylistStatus(
   );
   if (!res.ok)
     throw new Error(`Status konnte nicht geladen werden (${res.status})`);
-  const data = await res.json(); // Der Body wird per `json()` gelesen; ein zusaetzliches `cancel()` ist dann unnoetig.
+  const data = await res.json(); // Body wird gelesen -> KEIN cancel() danach
   return data.status as Status;
 }
 
-// Setzt den Sichtbarkeitsstatus einer Playlist explizit auf public/private.
+// 9) Status setzen
 export async function setPlaylistStatus(
   username: string,
   playlistName: string,
@@ -145,11 +145,11 @@ export async function setPlaylistStatus(
   );
   if (!res.ok)
     throw new Error(`Status konnte nicht gesetzt werden (${res.status})`);
-  const data = await res.json(); // Der Body wird per `json()` gelesen; ein zusaetzliches `cancel()` ist dann unnoetig.
+  const data = await res.json(); // Body wird gelesen -> KEIN cancel() danach
   return data.status as Status;
 }
 
-// Schaltet den Sichtbarkeitsstatus einer Playlist zwischen public und private um.
+// 10) Status umschalten (toggle)
 export async function togglePlaylistStatus(
   username: string,
   playlistName: string,
@@ -164,6 +164,6 @@ export async function togglePlaylistStatus(
   );
   if (!res.ok)
     throw new Error(`Status konnte nicht umgeschaltet werden (${res.status})`);
-  const data = await res.json(); // Der Body wird per `json()` gelesen; ein zusaetzliches `cancel()` ist dann unnoetig.
+  const data = await res.json(); // Body wird gelesen -> KEIN cancel() danach
   return data.status as Status;
 }

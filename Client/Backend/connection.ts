@@ -1,9 +1,10 @@
-// Verbindungsmodul fuer den Serverzugriff inkl. Validierung und optionaler Authentifizierung.
+// Client/Backend/connection.ts
+// Stellt die Verbindung zum Server her, validiert sie und (optional) startet authentication()
 
 import { authenticate } from "../Frontend/authenticate.ts";
 
 /**
- * Interner Zustand: aktuelle Server-URL.
+ * Interner Zustand: aktuelle Server-URL (wird von setServer/getServer verwaltet)
  */
 let SERVER_URL: string | null = null;
 
@@ -16,8 +17,10 @@ export function setServerUrl(url: string) {
 }
 
 /**
- * Robuster Ersatz fuer `fetch()` mit einmaligem Retry bei Verbindungsabbruechen.
- * Dadurch werden kurzzeitig inaktive Keep-Alive-Verbindungen transparent abgefangen.
+ * Drop-in-Ersatz für fetch() mit automatischem Retry bei ECONNRESET.
+ * Stale Verbindungen aus dem Keep-Alive-Pool verursachen ECONNRESET, wenn
+ * der Server die Verbindung wegen Inaktivität schließt. Ein einmaliger Retry
+ * öffnet dabei eine frische Verbindung.
  */
 export async function safeFetch(
   url: string,
@@ -31,7 +34,7 @@ export async function safeFetch(
       err?.cause?.code === "ECONNRESET" ||
       err?.cause?.code === "ECONNREFUSED"
     ) {
-      // Bei abgebrochener oder inaktiver Verbindung wird genau ein Wiederholungsversuch ausgefuehrt.
+      // Stale pooled connection – einmal neu versuchen
       return fetch(url, options);
     }
     throw err;
@@ -39,15 +42,15 @@ export async function safeFetch(
 }
 
 /**
- * Prueft Host/IP (IPv4, IPv6, Hostname) auf gueltiges Format.
+ * Plausibilitätscheck für Host/IP (IPv4, IPv6, Hostname) und Port
  */
 function isValidHost(host: string): boolean {
-  // Einfache Plausibilitaetspruefung fuer Hostname oder IP-Adresse (IPv4/IPv6).
+  // sehr einfache Plausi: hostname oder IP (IPv4/IPv6)
   const isIPv4 =
     /^(25[0-5]|2[0-4]\d|[01]?\d?\d)(\.(25[0-5]|2[0-4]\d|[01]?\d?\d)){3}$/.test(
       host,
     );
-  const isIPv6 = /^[0-9a-fA-F:]+$/.test(host) && host.includes(":"); // Vereinfachte Heuristik fuer IPv6.
+  const isIPv6 = /^[0-9a-fA-F:]+$/.test(host) && host.includes(":"); // grob
   const isHostname =
     /^(?!-)[A-Za-z0-9-]{1,63}(?<!-)(\.(?!-)[A-Za-z0-9-]{1,63}(?<!-))*\.?$/.test(
       host,
@@ -61,22 +64,22 @@ function isValidPort(port: number): boolean {
 }
 
 /**
- * Baut aus Host und Port eine gueltige Basis-URL (inklusive IPv6-Unterstuetzung).
+ * Baut aus host/port eine gültige URL (unterstützt IPv6)
  */
 function buildBaseUrl(
   host: string,
   port: number,
   protocol: "http" | "https" = "http",
 ): string {
-  // IPv6-Adressen muessen in URLs in eckige Klammern gesetzt werden.
+  // IPv6 muss in [ ] geklammert werden
   const bracketed =
     host.includes(":") && !host.startsWith("[") ? `[${host}]` : host;
   return `${protocol}://${bracketed}:${port}`;
 }
 
 /**
- * Fuehrt einen Ping mit Timeout auf den Server aus.
- * Erwartet eine erfolgreiche Antwort auf `GET /`.
+ * Ping zum Server mit Timeout.
+ * Erwartet, dass dein Server auf GET "/" antwortet.
  */
 async function pingServer(baseUrl: string, timeoutMs = 3000): Promise<void> {
   const controller = new AbortController();
@@ -84,7 +87,7 @@ async function pingServer(baseUrl: string, timeoutMs = 3000): Promise<void> {
 
   try {
     const res = await fetch(`${baseUrl}/`, { signal: controller.signal });
-    await res.body?.cancel(); // Gibt den nicht benoetigten Response-Body frei.
+    await res.body?.cancel(); // consume body to release the pooled connection
     if (!res.ok) {
       throw new Error(`Ping fehlgeschlagen: HTTP ${res.status}`);
     }
@@ -99,12 +102,12 @@ async function pingServer(baseUrl: string, timeoutMs = 3000): Promise<void> {
 }
 
 /**
- * Oeffentliche API:
- * - validiert Host und Port,
- * - erstellt die Basis-URL,
- * - prueft die Erreichbarkeit des Servers,
- * - speichert bei Erfolg die Server-URL,
- * - startet optional die Authentifizierung.
+ * Öffentliche API:
+ *  - Validiert Host & Port
+ *  - Baut URL
+ *  - Pingt den Server
+ *  - Setzt SERVER_URL bei Erfolg
+ *  - (optional) ruft authenticate() auf
  */
 export async function connectToServer(
   host: string,
@@ -113,14 +116,14 @@ export async function connectToServer(
     protocol?: "http" | "https";
     timeoutMs?: number;
     autoAuthenticate?: boolean;
-    onError?: (msg: string) => void; // Callback fuer UI-Fehlermeldungen.
-    onSuccess?: (url: string) => void; // Callback fuer UI-Erfolgsmeldungen.
+    onError?: (msg: string) => void; // für UI-Fehlerausgabe
+    onSuccess?: (url: string) => void; // für UI-Erfolgsmeldung
   },
 ): Promise<{ ok: true; url: string } | { ok: false; error: string }> {
   const protocol = options?.protocol ?? "http";
   const timeoutMs = options?.timeoutMs ?? 3000;
 
-  // Fuehrt fruehe Eingabepruefungen aus, bevor Netzwerkaufrufe gestartet werden.
+  // Plausibilitätsprüfungen
   if (!isValidHost(host)) {
     const msg = "Ungültiger Host/Hostname/IP.";
     options?.onError?.(msg);
@@ -140,7 +143,7 @@ export async function connectToServer(
     options?.onSuccess?.(baseUrl);
 
     if (options?.autoAuthenticate) {
-      // Wartet auf Abschluss der Authentifizierung, damit Folgeablaeufe konsistent bleiben.
+      // WICHTIG: authenticate ist async → warten, damit Abläufe konsistent sind
       await authenticate();
     }
 

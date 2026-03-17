@@ -1,4 +1,4 @@
-// Formatierungsfunktionen fuer die konsolenfreundliche Darstellung von Playlists und Songs.
+// Backend/format.ts
 import chalk from "chalk";
 import type { Playlist } from "../../models/personalModels.ts";
 import {
@@ -16,7 +16,7 @@ function toMinutesSeconds(rawDuration: string): string {
   return `${minutes}:${String(remainder).padStart(2, "0")}`;
 }
 
-/** Formatiert Playlists als gut lesbare Liste mit Statuskennzeichnung. */
+/** Formatiert Playlists als schöne Liste mit Icons & Status */
 export function formatPlaylists(playlists: Playlist[]): string {
   if (!Array.isArray(playlists) || playlists.length === 0) {
     return chalk.gray("Keine Playlists gefunden.");

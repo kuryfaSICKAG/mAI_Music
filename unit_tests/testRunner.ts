@@ -6,7 +6,7 @@ import { spawn } from "child_process";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// ANSI-Farbcodes fuer eine besser lesbare Terminal-Ausgabe.
+// ANSI color codes for pretty terminal output
 const colors = {
   reset: "\x1b[0m",
   bright: "\x1b[1m",
@@ -35,7 +35,7 @@ class TestRunner {
   private projectRoot: string;
 
   constructor() {
-    // Unterstuetzt Aufruf aus dem Projektroot oder direkt aus dem Ordner `unit_tests`.
+    // Handle being run from either project root or unit_tests directory
     if (path.basename(__dirname) === "unit_tests") {
       this.projectRoot = path.dirname(__dirname);
       this.testDir = __dirname;
@@ -103,7 +103,7 @@ class TestRunner {
         "\n",
     );
 
-    // Startet die Testausfuehrung ueber Vitest.
+    // Run vitest
     await this.executeVitest();
   }
 
@@ -253,7 +253,7 @@ class TestRunner {
   }
 }
 
-// Einstiegspunkt des Test-Runners.
+// Main entry point
 const runner = new TestRunner();
 runner.run().catch((error) => {
   console.error(colors.red + `Fatal error: ${error}` + colors.reset);

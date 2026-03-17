@@ -374,7 +374,7 @@ describe("Personal Models", () => {
     it("should require song name", () => {
       const songData = {
         id: "song-1",
-        // Simuliert fehlenden Songnamen.
+        // name is missing
         artist: [],
         genre: ["pop"],
         year: 2023,
@@ -392,7 +392,7 @@ describe("Personal Models", () => {
         genre: ["pop"],
         year: 2023,
         duration: 180,
-        // Das Albumfeld ist optional und darf fehlen.
+        // album is optional
       };
 
       expect(song.album).toBeUndefined();

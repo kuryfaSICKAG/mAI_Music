@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { DeezerAPI } from "../apiServices/deezerAPI/deezer.ts";
 
-// Mockt `fetch`, damit keine echten HTTP-Anfragen ausgefuehrt werden.
+// Mock fetch API
 global.fetch = vi.fn();
 
 describe("Deezer API", () => {
@@ -65,7 +65,7 @@ describe("Deezer API", () => {
       await api.searchTrack("Song & Artist @ 2024");
 
       const callUrl = fetchMock.mock.calls[0][0];
-      // Prueft, dass Sonderzeichen in der URL korrekt kodiert werden.
+      // Verify URL is properly encoded with special characters
       expect(callUrl).toContain("search");
       expect(callUrl).toContain("%");
       expect(callUrl).toContain("api.deezer.com");
@@ -125,7 +125,7 @@ describe("Deezer API", () => {
         text: async () =>
           JSON.stringify({
             id: "456",
-            // Simuliert eine unvollstaendige API-Antwort ohne optionale Felder.
+            // Missing title, artist, duration
           }),
       };
 

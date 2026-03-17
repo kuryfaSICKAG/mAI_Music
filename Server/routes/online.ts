@@ -24,7 +24,7 @@ onlineRouter.post("/sendPlaylist", (req: Request, res: Response) => {
       return res.status(404).json({ error: "Quell-Playlist nicht gefunden" });
     }
 
-    // Bricht ab, wenn beim Ziel bereits eine Playlist mit gleichem Namen existiert.
+    // Playlist existiert beim Ziel bereits → Abbrechen
     if (toArr.some((p: any) => p.name === playlistName)) {
       return res.status(409).json({
         ok: false,
@@ -32,9 +32,9 @@ onlineRouter.post("/sendPlaylist", (req: Request, res: Response) => {
       });
     }
 
-    const targetName = playlistName; // Uebernimmt den Namen unveraendert ohne automatisches Umbenennen.
+    const targetName = playlistName; // kein Rename mehr
 
-    // Empfangene Playlists werden aus Datenschutzgruenden standardmaessig als `private` gespeichert.
+    // Empfangene Playlists sind immer private
     const transferred: Playlist = {
       name: targetName,
       songs: saveSongs(source.songs),
@@ -63,8 +63,9 @@ onlineRouter.get(
       const db = loadPlaylists();
       const all = db.playlistsByUser[username] ?? [];
 
-      // Da in der Datenstruktur kein separates Eingangsfeld existiert,
-      // liefert diese Route derzeit alle Playlists des Benutzers zurueck.
+      // Hinweis: Da in der DB keine Extra-Felder gespeichert werden,
+      // liefert diese Route aktuell einfach alle Playlists des Users.
+      // Für echten „Posteingang“ bitte separaten Store nutzen (kann ich dir bauen).
       return res.json(all);
     } catch {
       return res

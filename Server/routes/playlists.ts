@@ -25,7 +25,7 @@ const playlistsRouter = Router();
 function resolveUserFromReq(req: Request): string | null {
   const bodyUser = (req.body?.username as string) || "";
   const queryUser = (req.query?.username as string) || "";
-  // Loest den Benutzer robust auf und faellt bei Bedarf auf Body/Query-Parameter zurueck.
+  // nutzt deine bestehende Logik und fällt auf Body/Query zurück
   return resolveEffectiveUsername(req, bodyUser || queryUser);
 }
 
@@ -267,9 +267,7 @@ playlistsRouter.get(
   (req: Request, res: Response) => {
     const username = resolveUserFromReq(req);
     if (!username) return res.status(401).json({ error: "Unauthorized" });
-    const playlistName = String(req.params.playlistName ?? "").trim();
-    if (!playlistName)
-      return res.status(400).json({ error: "playlistName fehlt" });
+    const { playlistName } = req.params;
     const status = getPlaylistStatusServer(username, playlistName);
     if (!status)
       return res.status(404).json({ error: "Playlist nicht gefunden" });
@@ -282,9 +280,7 @@ playlistsRouter.patch(
   (req: Request, res: Response) => {
     const username = resolveUserFromReq(req);
     if (!username) return res.status(401).json({ error: "Unauthorized" });
-    const playlistName = String(req.params.playlistName ?? "").trim();
-    if (!playlistName)
-      return res.status(400).json({ error: "playlistName fehlt" });
+    const { playlistName } = req.params;
     const { status } = req.body as { status?: Status };
     if (status !== "public" && status !== "private") {
       return res
@@ -302,9 +298,7 @@ playlistsRouter.post(
   (req: Request, res: Response) => {
     const username = resolveUserFromReq(req);
     if (!username) return res.status(401).json({ error: "Unauthorized" });
-    const playlistName = String(req.params.playlistName ?? "").trim();
-    if (!playlistName)
-      return res.status(400).json({ error: "playlistName fehlt" });
+    const { playlistName } = req.params;
     const next = togglePlaylistStatusServer(username, playlistName);
     if (!next)
       return res.status(404).json({ error: "Playlist nicht gefunden" });
@@ -382,122 +376,17 @@ playlistsRouter.post("/playlist/ai/create", async (req: Request, res: Response) 
         .json({ error: "username, playlistName oder mood fehlt" });
     }
 
-    const success = await createAIPlaylist(username, playlistName, mood, undefined, {
-      skipConfirmation: true,
-    });
+      const success = await createAIPlaylist(username, playlistName, mood);
 
-    if (!success) {
-      return res.status(400).json({
-        ok: false,
-        error: "Playlist konnte nicht erstellt werden.",
-      });
-    }
-
-    const { playlist } = findPlaylist(username, playlistName);
-    return res.status(201).json({
-      ok: true,
-      message: `Playlist "${playlistName}" wurde erfolgreich mit KI erstellt!`,
-      playlist,
-    });
-  } catch (error: any) {
-    return res.status(500).json({
-      error: "AI Playlist erstellen fehlgeschlagen",
-      detail: error?.message ?? "Unbekannter Fehler",
-    });
-  }
-});
-
-playlistsRouter.post(
-  "/playlist/ai/from-playlist",
-  async (req: Request, res: Response) => {
-    try {
-      const { username, newPlaylistName, basePlaylistName } = req.body;
-
-      if (!username || !newPlaylistName || !basePlaylistName) {
-        return res
-          .status(400)
-          .json({ error: "username, newPlaylistName oder basePlaylistName fehlt" });
-      }
-
-      const success = await AIPlaylistFromPlaylist(
-        username,
-        newPlaylistName,
-        basePlaylistName,
-        { skipConfirmation: true },
-      );
-
-      if (!success) {
-        return res.status(400).json({
-          ok: false,
-          error: "KI-Playlist konnte aus der Basis-Playlist nicht erstellt werden.",
+      if (success) {
+        // Lade die neu erstellte Playlist
+        const { playlist } = findPlaylist(username, playlistName);
+        return res.status(201).json({
+          ok: true,
+          message: `Playlist "${playlistName}" wurde erfolgreich mit KI erstellt!`,
+          playlist,
         });
-      }
-
-      const { playlist } = findPlaylist(username, newPlaylistName);
-      return res.status(201).json({
-        ok: true,
-        playlist,
-      });
-    } catch (error: any) {
-      return res.status(500).json({
-        error: "AI Playlist aus Basis-Playlist fehlgeschlagen",
-        detail: error?.message ?? "Unbekannter Fehler",
-      });
-    }
-  },
-);
-
-playlistsRouter.post("/playlist/ai/add", async (req: Request, res: Response) => {
-  try {
-    const { username, targetPlaylistName, mood } = req.body;
-
-    if (!username || !targetPlaylistName || !mood) {
-      return res
-        .status(400)
-        .json({ error: "username, targetPlaylistName oder mood fehlt" });
-    }
-
-    const success = await addAISongsToPlaylist(
-      username,
-      targetPlaylistName,
-      mood,
-      undefined,
-      { skipConfirmation: true },
-    );
-
-    if (!success) {
-      return res.status(400).json({
-        ok: false,
-        error: "Es konnten keine neuen KI-Songs hinzugefuegt werden.",
-      });
-    }
-
-    return res.status(200).json({ ok: true });
-  } catch (error: any) {
-    return res.status(500).json({
-      error: "AI Songs hinzufuegen fehlgeschlagen",
-      detail: error?.message ?? "Unbekannter Fehler",
-    });
-  }
-});
-
-playlistsRouter.post(
-  "/playlist/ai/analyze-add",
-  async (req: Request, res: Response) => {
-    try {
-      const { username, playlistName } = req.body;
-
-      if (!username || !playlistName) {
-        return res.status(400).json({ error: "username oder playlistName fehlt" });
-      }
-
-      const success = await addAIToSamePlaylistFromPlaylistAnalysis(
-        username,
-        playlistName,
-        { skipConfirmation: true },
-      );
-
-      if (!success) {
+      } else {
         return res.status(400).json({
           ok: false,
           error: "Playlist konnte nicht analysiert oder erweitert werden.",

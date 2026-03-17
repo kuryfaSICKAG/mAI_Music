@@ -26,7 +26,7 @@ export async function drawSong(activeUser: string): Promise<void> {
   ]);
 
   if (action === "back") {
-    console.log(""); // Fuegt eine Leerzeile fuer bessere Lesbarkeit im Menue hinzu.
+    console.log(""); // <<< eine extra Leerzeile
     return drawMenu(activeUser, true);
   }
 
@@ -40,7 +40,7 @@ export async function drawSong(activeUser: string): Promise<void> {
       return drawSong(activeUser);
     }
 
-    // Baut die auswählbare Songliste mit Titel und Interpret auf.
+    // Songliste (Titel + Artist)
     const resultChoices = await Promise.all(
       searchResults.map(async (raw, i) => {
         const id = String(raw);
@@ -54,7 +54,7 @@ export async function drawSong(activeUser: string): Promise<void> {
     );
 
     const doAdd = await askConfirm("Möchtest du einen Song hinzufügen?");
-    console.log(""); // Trennt Bestaetigung und Auswahl visuell.
+    console.log(""); // <<< extra Leerzeile
 
     if (!doAdd) return drawSong(activeUser);
 
@@ -63,7 +63,7 @@ export async function drawSong(activeUser: string): Promise<void> {
       { name: "❌ Abbrechen\n", value: "cancel" },
     ]);
 
-    console.log(""); // Trennt Auswahl und Ergebnis visuell.
+    console.log(""); // <<< extra Leerzeile
 
     if (songId === "cancel") return drawSong(activeUser);
 

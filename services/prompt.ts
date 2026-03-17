@@ -1,4 +1,4 @@
-// Einheitliche Prompt-Hilfsfunktionen fuer Konsoleneingaben.
+// services/prompt.ts
 import inquirer from "inquirer";
 
 export async function ask(message: string): Promise<string> {
@@ -48,11 +48,11 @@ export async function askChoice<T = string>(
 ): Promise<T> {
   const answer: { value: T } = await inquirer.prompt([
     {
-      type: "select", // Verwendet eine Auswahlsteuerung fuer bessere Navigation.
+      type: "select", // <-- statt "list"
       name: "value",
       message,
       choices: choices as any,
-      pageSize, // Definiert die Anzahl sichtbarer Eintraege pro Seite.
+      pageSize, // <-- CamelCase
     },
   ]);
   return answer.value;

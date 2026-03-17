@@ -1,7 +1,7 @@
 import chalk from "chalk";
 
 export function header(title: string) {
-  const padding = 2; // Definiert den horizontalen Innenabstand des Titels im Rahmen.
+  const padding = 2; // Abstand links/rechts um den Text
   const contentWidth = title.length + padding * 2;
 
   const top = "┌" + "─".repeat(contentWidth) + "┐";

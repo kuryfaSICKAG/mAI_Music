@@ -1,14 +1,15 @@
-// Online-Services fuer das Senden, Empfangen und Abrufen oeffentlicher Playlists.
+// Client/Backend/onlineServices.ts
+// Online-Funktionen fürs Verschicken und Empfangen von Playlists (minimal, ohne TS-Interfaces)
 
 import { getServerUrl } from "./connection.ts";
 import type { Status } from "../../models/personalModels.ts";
 
-/** Baut URLs robust zusammen und vermeidet doppelte Slashes. */
+/** URL sicher zusammenbauen (verhindert doppelte Slashes) */
 function joinUrl(base: string, path: string) {
   return `${base.replace(/\/+$/, "")}/${path.replace(/^\/+/, "")}`;
 }
 
-/** Liest eine Antwort sicher als Text, auch wenn JSON-Parsen fehlschlaegt. */
+/** Hilfsfunktion: Antwort als Text holen (falls kein JSON) */
 async function safeText(res: Response) {
   try {
     return await res.text();
@@ -17,7 +18,7 @@ async function safeText(res: Response) {
   }
 }
 
-/** Liest eine Antwort als JSON und faellt bei Fehlern auf einen Fallbackwert zurueck. */
+/** Hilfsfunktion: Antwort als JSON holen, sonst Fallback */
 async function safeJson<T = any>(res: Response, fallback: T): Promise<T> {
   try {
     return (await res.json()) as T;
@@ -66,7 +67,7 @@ export async function sendPlaylist(
       message: data?.message ?? "Playlist erfolgreich verschickt!",
     };
   } catch (err: any) {
-    // Deckt typische Netzwerkfehler wie ECONNRESET, ENOTFOUND oder ECONNREFUSED ab.
+    // z.B. ECONNRESET, ENOTFOUND, ECONNREFUSED ...
     return {
       ok: false,
       error: `Netzwerkfehler: ${err?.message ?? String(err)}`,
