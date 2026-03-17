@@ -225,12 +225,10 @@ playlistsRouter.post(
         },
       });
     } catch (error: any) {
-      return res
-        .status(502)
-        .json({
-          error: "Quick-Add fehlgeschlagen",
-          detail: error?.message ?? "Unbekannter Fehler",
-        });
+      return res.status(502).json({
+        error: "Quick-Add fehlgeschlagen",
+        detail: error?.message ?? "Unbekannter Fehler",
+      });
     }
   },
 );
@@ -252,12 +250,10 @@ playlistsRouter.get("/song/:songId", async (req: Request, res: Response) => {
       duration: Number(track?.duration ?? 0),
     });
   } catch (error: any) {
-    return res
-      .status(502)
-      .json({
-        error: "Song konnte nicht geladen werden",
-        detail: error?.message ?? "Unbekannter Fehler",
-      });
+    return res.status(502).json({
+      error: "Song konnte nicht geladen werden",
+      detail: error?.message ?? "Unbekannter Fehler",
+    });
   }
 });
 

@@ -23,7 +23,7 @@ export async function drawPlaylist(activeUser: string): Promise<void> {
   else console.log(formatPlaylists(lists));
 
   const choice = await askChoice("Option wählen:", [
-    { name: "Playlist einsehen", value: "lookup"},
+    { name: "Playlist einsehen", value: "lookup" },
     { name: "Playlist erstellen", value: "create" },
     { name: "Playlist bearbeiten", value: "edit" },
     { name: "Playlist löschen", value: "delete" },
@@ -34,8 +34,8 @@ export async function drawPlaylist(activeUser: string): Promise<void> {
     if (lists.length === 0) return drawPlaylist(activeUser);
 
     const selected = await askChoice(
-        "Welche Playlist einsehen?",
-        lists.map((p) => ({
+      "Welche Playlist einsehen?",
+      lists.map((p) => ({
         name: `${p.name} (${p.songs.length} Songs)`,
         value: p.name,
       })),

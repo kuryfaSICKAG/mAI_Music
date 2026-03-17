@@ -54,9 +54,13 @@ authRouter.post("/auth/login", (req: Request, res: Response) => {
 
   const data = loadUsers();
   // TODO (sicher): bcrypt.compare statt Klartext-Vergleich
-  const user = data.users.find((u: any) => u.username === username && u.password === password);
+  const user = data.users.find(
+    (u: any) => u.username === username && u.password === password,
+  );
   if (!user) {
-    return res.status(401).json({ error: "Benutzername oder Passwort falsch!" });
+    return res
+      .status(401)
+      .json({ error: "Benutzername oder Passwort falsch!" });
   }
 
   const session = createSession(username);
@@ -126,7 +130,9 @@ authRouter.post("/auth/check", (req: Request, res: Response) => {
   const username = String(req.body?.username ?? "").trim();
 
   if (!username) {
-    return res.status(400).json({ error: "Ungültiger oder fehlender Benutzername." });
+    return res
+      .status(400)
+      .json({ error: "Ungültiger oder fehlender Benutzername." });
   }
 
   try {
