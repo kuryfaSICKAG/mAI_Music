@@ -225,9 +225,7 @@ export async function getPublicPlaylistDetail(
   }
 }
 
-export async function getSongInfoPublic(
-  songId: string,
-): Promise<
+export async function getSongInfoPublic(songId: string): Promise<
   | {
       ok: true;
       song: {

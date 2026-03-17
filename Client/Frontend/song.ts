@@ -76,18 +76,17 @@ export async function drawSong(activeUser: string): Promise<void> {
 
     console.log(formatPlaylists(playlists) + "\n");
 
-    const playlistName = await askChoice(
-      "Zu welcher Playlist hinzufügen?",[
+    const playlistName = await askChoice("Zu welcher Playlist hinzufügen?", [
       ...playlists.map((pl) => ({
         name: `${pl.name} (${pl.songs.length} Songs)`,
         value: pl.name,
       })),
-    {
+      {
         name: "❌ Abbrechen",
         value: null,
-    }]
-    );
-    if(playlistName === null) return drawSong(activeUser);
+      },
+    ]);
+    if (playlistName === null) return drawSong(activeUser);
 
     const title = await getTrackNameFromID(songId);
     const result = await addSong(activeUser, playlistName, songId);

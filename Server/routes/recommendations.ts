@@ -60,12 +60,10 @@ recommendationsRouter.post(
 
       return res.json({ ok: true, source: "playlist", recommendations: out });
     } catch (error: any) {
-      return res
-        .status(502)
-        .json({
-          error: "Empfehlungen fehlgeschlagen",
-          detail: error?.message ?? "Unbekannter Fehler",
-        });
+      return res.status(502).json({
+        error: "Empfehlungen fehlgeschlagen",
+        detail: error?.message ?? "Unbekannter Fehler",
+      });
     }
   },
 );
@@ -104,12 +102,10 @@ recommendationsRouter.get(
       const recommendations = await searchDeezer(seed, "track", limit);
       return res.json({ ok: true, source: "user", recommendations });
     } catch (error: any) {
-      return res
-        .status(502)
-        .json({
-          error: "User-Empfehlungen fehlgeschlagen",
-          detail: error?.message ?? "Unbekannter Fehler",
-        });
+      return res.status(502).json({
+        error: "User-Empfehlungen fehlgeschlagen",
+        detail: error?.message ?? "Unbekannter Fehler",
+      });
     }
   },
 );

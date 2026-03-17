@@ -35,21 +35,22 @@ export function formatPlaylists(playlists: Playlist[]): string {
 }
 
 export async function formatSongs(playlist: Playlist): Promise<string> {
+  const songs = await Promise.all(
+    playlist.songs.map(async (id) => {
+      const title = await getTrackNameFromID(id);
+      const artist = await getTrackArtistFromID(id);
+      const durationRaw = await getTrackDurationFromID(id);
+      const duration = toMinutesSeconds(durationRaw);
+      return {
+        id,
+        label: `${title} — ${artist} (${duration})`,
+      };
+    }),
+  );
 
-    const songs = await Promise.all(
-      playlist.songs.map(async (id) => {
-        const title = await getTrackNameFromID(id);
-        const artist = await getTrackArtistFromID(id);
-        const durationRaw = await getTrackDurationFromID(id);
-        const duration = toMinutesSeconds(durationRaw);
-        return {
-          id,
-          label: `${title} — ${artist} (${duration})`,
-        };
-      }),
-    );
-
-    return songs
-      .map((song, idx) => `${chalk.cyan(idx + 1 + ".")}  ${chalk.bold(song.label)}`)
-      .join("\n");
+  return songs
+    .map(
+      (song, idx) => `${chalk.cyan(idx + 1 + ".")}  ${chalk.bold(song.label)}`,
+    )
+    .join("\n");
 }

@@ -1,5 +1,10 @@
 import { header } from "../../services/ui.ts";
-import { ask, askChoice, askConfirm, waitEnter } from "../../services/prompt.ts";
+import {
+  ask,
+  askChoice,
+  askConfirm,
+  waitEnter,
+} from "../../services/prompt.ts";
 import { formatPlaylists } from "../Backend/format.ts";
 import { getPlaylists } from "../Backend/playlist.ts";
 import { drawMenu } from "./menu.ts";
@@ -16,7 +21,10 @@ export async function drawAI(activeUser: string) {
 
   const choice = await askChoice("Was möchtest du tun:", [
     { name: "Neue Playlist mit Prompt erstellen", value: "prompt" },
-    { name: "Neue Playlist aus bestehender Playlist erstellen", value: "playlist" },
+    {
+      name: "Neue Playlist aus bestehender Playlist erstellen",
+      value: "playlist",
+    },
     { name: "Playlist durch Prompt ergänzen", value: "append" },
     {
       name: "Playlist durch KI-Analyse ergänzen",
