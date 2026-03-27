@@ -1,9 +1,5 @@
 import { header } from "../../services/ui.ts";
-import {
-  ask,
-  askChoice,
-  waitEnter,
-} from "../../services/prompt.ts";
+import { ask, askChoice, waitEnter } from "../../services/prompt.ts";
 import { formatPlaylists } from "../Backend/format.ts";
 import { getPlaylists } from "../Backend/playlist.ts";
 import {

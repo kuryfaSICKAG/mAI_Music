@@ -1,6 +1,10 @@
 import { DeezerAPI } from "../apiServices/deezerAPI/deezer.ts";
 import { ask } from "./prompt.ts";
-import { getPlaylists, createPlaylist, addSong, } from "../Client/Backend/playlist.ts";
+import {
+  getPlaylists,
+  createPlaylist,
+  addSong,
+} from "../Client/Backend/playlist.ts";
 import dotenv from "dotenv";
 import {
   type MatchedSong,
@@ -162,11 +166,17 @@ export async function AIPlaylistFromPlaylist(
     }
 
     console.log(`\n📝 Generierter Prompt: ${profile.prompt}`);
-    return createAIPlaylist(username, newPlaylistName, profile.prompt, {
-      languageHint: profile.languageHint,
-      referenceArtists: profile.referenceArtists,
-      referenceSongs: sourceSongs,
-    }, options);
+    return createAIPlaylist(
+      username,
+      newPlaylistName,
+      profile.prompt,
+      {
+        languageHint: profile.languageHint,
+        referenceArtists: profile.referenceArtists,
+        referenceSongs: sourceSongs,
+      },
+      options,
+    );
   } catch (err: any) {
     console.error("Fehler in AIPlaylistFromPlaylist:", err?.message || err);
     return false;
@@ -236,11 +246,17 @@ export async function addAIToSamePlaylistFromPlaylistAnalysis(
     }
 
     console.log(`\n📝 Generierter Prompt: ${profile.prompt}`);
-    return addAISongsToPlaylist(username, playlistName, profile.prompt, {
-      languageHint: profile.languageHint,
-      referenceArtists: profile.referenceArtists,
-      referenceSongs: sourceSongs,
-    }, options);
+    return addAISongsToPlaylist(
+      username,
+      playlistName,
+      profile.prompt,
+      {
+        languageHint: profile.languageHint,
+        referenceArtists: profile.referenceArtists,
+        referenceSongs: sourceSongs,
+      },
+      options,
+    );
   } catch (err: any) {
     console.error(
       "Fehler in addAIToSamePlaylistFromPlaylistAnalysis:",

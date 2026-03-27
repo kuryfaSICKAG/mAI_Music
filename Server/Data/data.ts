@@ -19,7 +19,7 @@ const userFile = path.join(__dirname, "user_Data.json");
 const playlistFile = path.join(__dirname, "playlist_data.json");
 
 // Datei/Ordner sicherstellen
-function ensureFile(filePath: string, defaultData: object) {
+function ensureFile(filePath: string, defaultData: any) {
   const dir = path.dirname(filePath);
 
   if (!fs.existsSync(dir)) {
@@ -27,14 +27,33 @@ function ensureFile(filePath: string, defaultData: object) {
   }
 
   if (!fs.existsSync(filePath)) {
-    fs.writeFileSync(filePath, JSON.stringify(defaultData, null, 4), "utf8");
+    fs.writeFileSync(
+      filePath,
+      JSON.stringify(defaultData ?? {}, null, 4),
+      "utf8",
+    );
   }
 }
 
 // JSON Loader
-export function loadJSON<T = any>(filePath: string): T {
-  ensureFile(filePath, {}); // leeres Objekt, falls Datei fehlt
-  return JSON.parse(fs.readFileSync(filePath, "utf8")) as T;
+export function loadJSON<T = any>(filePath: string, fallback: T = {} as T): T {
+  ensureFile(filePath, fallback);
+
+  try {
+    const raw = fs.readFileSync(filePath, "utf8");
+    if (!raw || !raw.trim()) {
+      saveJSON(filePath, fallback);
+      return fallback;
+    }
+    return JSON.parse(raw) as T;
+  } catch (error) {
+    console.error(
+      `Warnung: ${path.basename(filePath)} war beschädigt oder leer. Datei wird zurückgesetzt.`,
+      error,
+    );
+    saveJSON(filePath, fallback);
+    return fallback;
+  }
 }
 
 // JSON Saver
@@ -121,7 +140,10 @@ function normalizeSession(session: any): AuthSession | null {
 export function loadUsers(): UsersDB {
   ensureFile(userFile, { users: [], authSessions: [] });
 
-  const db = loadJSON<UsersDB>(userFile);
+  const db = loadJSON<UsersDB>(userFile, {
+    users: [],
+    authSessions: [],
+  });
 
   const users = Array.isArray(db?.users)
     ? db.users.map(normalizeUser).filter((u) => u.username)
@@ -175,7 +197,7 @@ function normalizePlaylist(p: any): PMPlaylist {
 export function loadPlaylists(): PlaylistsDB {
   ensureFile(playlistFile, { playlistsByUser: {} });
 
-  const raw = loadJSON<any>(playlistFile);
+  const raw = loadJSON<any>(playlistFile, { playlistsByUser: {} });
 
   const playlistsByUser: Record<string, PMPlaylist[]> = {};
   if (

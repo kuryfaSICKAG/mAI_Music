@@ -18,20 +18,20 @@ export class DeezerAPI {
   // --- Artist search ---
   searchArtist(name: string) {
     return this.get<{ data: any[] }>(
-      `search/artist?q=${encodeURIComponent(name)}`
+      `search/artist?q=${encodeURIComponent(name)}`,
     );
   }
 
   getArtistTopTracks(artistId: string, limit = 10) {
     return this.get<{ data: any[] }>(
-      `artist/${encodeURIComponent(artistId)}/top?limit=${encodeURIComponent(String(limit))}`
+      `artist/${encodeURIComponent(artistId)}/top?limit=${encodeURIComponent(String(limit))}`,
     );
   }
 
   // --- Album search ---
   searchAlbum(name: string) {
     return this.get<{ data: any[] }>(
-      `search/album?q=${encodeURIComponent(name)}`
+      `search/album?q=${encodeURIComponent(name)}`,
     );
   }
 
@@ -43,23 +43,19 @@ export class DeezerAPI {
   searchTrack(title: string) {
     // Deezer supports track-only search!
     return this.get<{ data: any[] }>(
-      `search?q=track:"${encodeURIComponent(title)}"`
+      `search?q=track:"${encodeURIComponent(title)}"`,
     );
   }
 
   /** Präzisere Suche mit Titel UND Interpret für deterministisches Matching */
   searchTrackPrecise(title: string, artist: string) {
     const query = `artist:"${artist}" track:"${title}"`;
-    return this.get<{ data: any[] }>(
-      `search?q=${encodeURIComponent(query)}`
-    );
+    return this.get<{ data: any[] }>(`search?q=${encodeURIComponent(query)}`);
   }
 
   /** Allgemeine Freitextsuche ohne Feldqualifikatoren */
   searchPlain(query: string) {
-    return this.get<{ data: any[] }>(
-      `search?q=${encodeURIComponent(query)}`
-    );
+    return this.get<{ data: any[] }>(`search?q=${encodeURIComponent(query)}`);
   }
 
   lookupTrack(id: string) {

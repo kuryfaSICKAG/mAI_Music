@@ -166,7 +166,6 @@ describe("API Integration Tests", () => {
     });
   });
 
-
   describe("Error Handling in Endpoints", () => {
     it("should return 400 for missing required fields", () => {
       const statusCode = 400;
