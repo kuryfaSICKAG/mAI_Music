@@ -1,5 +1,5 @@
 import { askChoice } from "../../services/prompt.ts";
-import { authenticate } from "./authenticate.ts";
+import { authenticate, resetActiveUser } from "./authenticate.ts";
 import { drawPlaylist } from "./drawPlaylist.ts";
 import { drawSong } from "./song.ts";
 import { drawOnline } from "./online.ts";
@@ -37,5 +37,6 @@ export async function drawMenu(
   if (choice === "online") return drawOnline(activeUser);
   if (choice === "ai") return drawAI(activeUser);
 
+  resetActiveUser();
   return authenticate();
 }

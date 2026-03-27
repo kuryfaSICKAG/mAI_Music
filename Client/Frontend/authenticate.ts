@@ -6,10 +6,14 @@ import {
 } from "../../services/prompt.ts";
 import { createUser, validateUser } from "../Backend/authentication.ts";
 import { initUser } from "../Backend/playlist.ts";
-import { drawMenu, sleep } from "./menu.ts";
+import { drawMenu } from "./menu.ts";
 import { header } from "../../services/ui.ts";
 
 export let activeUser = "";
+
+export function resetActiveUser(): void {
+  activeUser = "";
+}
 
 async function signUpUser(): Promise<void> {
   console.clear();
@@ -83,7 +87,10 @@ export async function authenticate(): Promise<void> {
 
   if (action === "signup") await signUpUser();
   else if (action === "login") await loginUser();
-  else return;
+  else {
+    resetActiveUser();
+    process.exit(0);
+  }
 
   if (activeUser) return drawMenu(activeUser, false);
 }
