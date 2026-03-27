@@ -168,68 +168,6 @@ export async function getTrackDurationFromID(songID: string): Promise<string> {
   }
 }
 
-// export async function addToPlaylist(
-//   songID: string,
-//   playlistName: string,
-//   userName: string,
-// ): Promise<"added" | "exists" | "error"> {
-//   const currentFile = fileURLToPath(import.meta.url);
-//   const currentDir = path.dirname(currentFile);
-//   const filePath = path.resolve(
-//     currentDir,
-//     "..",
-//     "Server",
-//     "Data",
-//     "playlist_data.json",
-//   );
-//   try {
-//     const raw = await fs.readFile(filePath, "utf8");
-//     const data: any = JSON.parse(raw || "{}");
-
-//     if (!data || typeof data !== "object" || Array.isArray(data)) {
-//       console.error(
-//         "addToPlaylist error: Invalid playlist_data.json structure.",
-//       );
-//       return "error";
-//     }
-
-//     const userPlaylists = data.playlistsByUser?.[userName];
-//     if (!Array.isArray(userPlaylists)) {
-//       return "error";
-//     }
-
-//     const targetPlaylistName = playlistName.trim().toLowerCase();
-//     const playlist = userPlaylists.find(
-//       (p: any) =>
-//         String(p?.name ?? "")
-//           .trim()
-//           .toLowerCase() === targetPlaylistName,
-//     );
-//     if (!playlist) {
-//       return "error";
-//     }
-
-//     if (!Array.isArray(playlist.songs)) playlist.songs = [];
-//     const normalizedSongId = String(songID);
-//     const alreadyExists = playlist.songs.some(
-//       (existingId: any) => String(existingId) === normalizedSongId,
-//     );
-//     if (alreadyExists) {
-//       return "exists";
-//     }
-
-//     playlist.songs.push(normalizedSongId);
-//     await fs.writeFile(filePath, JSON.stringify(data, null, 2), "utf8");
-//     return "added";
-//   } catch {
-//     return "error";
-//   }
-// }
-
-// export function newPlaylist(name: string){
-
-// }
-
 export {
   createAIPlaylist,
   AIPlaylistFromPlaylist,

@@ -14,7 +14,6 @@ import { addSong } from "../Backend/playlist.ts";
 import { getPlaylists } from "../Backend/playlist.ts";
 import { formatPlaylists } from "../Backend/format.ts";
 import { header } from "../../services/ui.ts";
-import { drawPlaylist } from "./drawPlaylist.ts";
 
 export async function drawSong(activeUser: string): Promise<void> {
   console.clear();
@@ -26,7 +25,7 @@ export async function drawSong(activeUser: string): Promise<void> {
   ]);
 
   if (action === "back") {
-    console.log(""); // <<< eine extra Leerzeile
+    console.log("");
     return drawMenu(activeUser, true);
   }
 
@@ -40,7 +39,6 @@ export async function drawSong(activeUser: string): Promise<void> {
       return drawSong(activeUser);
     }
 
-    // Songliste (Titel + Artist)
     const resultChoices = await Promise.all(
       searchResults.map(async (raw, i) => {
         const id = String(raw);
@@ -54,7 +52,7 @@ export async function drawSong(activeUser: string): Promise<void> {
     );
 
     const doAdd = await askConfirm("Möchtest du einen Song hinzufügen?");
-    console.log(""); // <<< extra Leerzeile
+    console.log("");
 
     if (!doAdd) return drawSong(activeUser);
 
@@ -63,7 +61,7 @@ export async function drawSong(activeUser: string): Promise<void> {
       { name: "❌ Abbrechen\n", value: "cancel" },
     ]);
 
-    console.log(""); // <<< extra Leerzeile
+    console.log("");
 
     if (songId === "cancel") return drawSong(activeUser);
 

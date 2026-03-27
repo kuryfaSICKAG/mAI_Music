@@ -1,66 +1,4 @@
 import { DeezerAPI } from "./deezer.ts";
-import type { Album, Artist, Genre, Song } from "../../models/personalModels.ts";
-
-function buildArtistFromTrack(track: any): Artist[] {
-  if (track?.artist?.name) {
-    return [{ name: track.artist.name, nationality: "", age: 0, genre: [] }];
-  }
-  if (track?.artist_name) {
-    return [{ name: track.artist_name, nationality: "", age: 0, genre: [] }];
-  }
-  return [];
-}
-
-function buildAlbumFromAlbum(album: any): Album | undefined {
-  if (!album) {
-    return undefined;
-  }
-
-  const albumArtistName = album?.artist?.name || album?.artist_name || "";
-  const albumArtist: Artist[] = albumArtistName
-    ? [{ name: albumArtistName, nationality: "", age: 0, genre: [] }]
-    : [];
-
-  return {
-    name: album?.title || album?.name || "",
-    artist: albumArtist,
-    genre: [],
-    year: album?.release_date
-      ? Number(String(album.release_date).slice(0, 4))
-      : 0,
-    songs: [],
-  };
-}
-
-async function buildSongFromTitle(
-  api: DeezerAPI,
-  title: string
-): Promise<Song | null> {
-  const tracks = await api.searchTrack(title);
-  if (!tracks.data || tracks.data.length === 0) {
-    return null;
-  }
-
-  const track = await api.lookupTrack(String(tracks.data[0].id));
-  const album = track?.album?.id
-    ? await api.lookupAlbum(String(track.album.id))
-    : undefined;
-
-  const builtAlbum = buildAlbumFromAlbum(album);
-  return {
-    id: String(track?.id ?? tracks.data[0]?.id ?? ""),
-    name: track?.title || track?.title_short || track?.name || title,
-    artist: buildArtistFromTrack(track),
-    genre: [] as Genre[],
-    year: track?.release_date
-      ? Number(String(track.release_date).slice(0, 4))
-      : album?.release_date
-      ? Number(String(album.release_date).slice(0, 4))
-      : 0,
-    duration: track?.duration ?? 0,
-    album: builtAlbum,
-  } as const;
-}
 
 export async function buildPersonalModel(trackTitle: string) {
   const api = new DeezerAPI();
@@ -97,22 +35,4 @@ export async function buildPersonalModel(trackTitle: string) {
   } else {
     console.log("No tracks found.");
   }
-  //console.log(tracks.data);
-  /*
-  // Search artist
-  const artists = await api.searchArtist("Coldplay");
-  console.log("Artists:", artists.data);
-
-  // Search album
-  const albums = await api.searchAlbum("Parachutes");
-  console.log("Albums:", albums.data);
-
-  // Lookup a track by ID
-  if (tracks.data.length > 0) {
-    const track = await api.lookupTrack(tracks.data[0].id);
-    console.log("Track details:", track);
-  }
-    */
-}       // to try out: npx ts-node apiServices\deezerAPI\buildPersonalModel.ts
-
-//buildPersonalModel("Yellow");
+}
